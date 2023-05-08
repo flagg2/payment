@@ -1,0 +1,49 @@
+{
+   "name": "@flagg2/result",
+   "version": "1.2.1",
+   "description": "",
+   "main": "dist/index.js",
+   "module": "dist/index.mjs",
+   "types": "dist/index.d.ts",
+   "scripts": {
+      "lint": "tsc --noEmit",
+      "build": "tsup src/index.ts --dts --format cjs,esm",
+      "release": "pnpm changeset && rm -r dist && pnpm run build && changeset version && changeset publish"
+   },
+   "keywords": [],
+   "author": "",
+   "license": "ISC",
+   "dependencies": {
+      "@flagg2/result": "^1.2.1",
+      "@flagg2/ts-util": "^1.0.2",
+      "clone": "^2.1.2",
+      "dayjs": "^1.11.7",
+      "easyinvoice": "^3.0.16",
+      "stripe": "^12.4.0"
+   },
+   "devDependencies": {
+      "@changesets/cli": "^2.26.1",
+      "@types/clone": "^2.1.1",
+      "@types/node": "^18.13.0",
+      "@typescript-eslint/eslint-plugin": "^5.51.0",
+      "@typescript-eslint/parser": "^5.51.0",
+      "eslint": "^8.33.0",
+      "eslint-config-standard-with-typescript": "^34.0.0",
+      "eslint-plugin-import": "^2.27.5",
+      "eslint-plugin-n": "^15.6.1",
+      "eslint-plugin-promise": "^6.1.1",
+      "prettier": "2.8.3",
+      "tsup": "^6.7.0",
+      "typescript": "^5.0.4",
+      "vitest": "^0.29.2"
+   },
+   "prettier": {
+      "printWidth": 80,
+      "singleQuote": false,
+      "trailingComma": "all",
+      "tabWidth": 3,
+      "semi": false,
+      "arrowParens": "always",
+      "endOfLine": "lf"
+   }
+}
