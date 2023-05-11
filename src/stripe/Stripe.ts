@@ -3,6 +3,7 @@ import { Stripe as StripeSdk } from "stripe"
 import { TaxRate } from "../payment/TaxRate"
 import { paymentItemQuery } from "../payment/PaymentItem"
 import { Payment, paymentQuery } from "../payment/Payment"
+import { priceQuery } from "../payment/Price"
 
 type StripeCheckoutSession = StripeSdk.Checkout.Session
 type StripeLineItem = StripeSdk.Checkout.SessionCreateParams.LineItem
@@ -169,7 +170,7 @@ class Stripe {
             tax_rates: [taxRate.id],
             price_data: {
                currency: payment.currency,
-               unit_amount: paymentItemQuery.getTotalInCents(item),
+               unit_amount: priceQuery.getAsCents(item.price),
                product_data: {
                   name: item.name,
                   description: item.description,

@@ -42,12 +42,12 @@ function parseUnknown(invoice: unknown): Result<Invoice> {
    const paymentItemSchema = z.object({
       name: z.string().nonempty(),
       price: z.object({
-         whole: z.number().int().positive(),
-         decimal: z.number().int().positive(),
+         whole: z.coerce.number().int().positive(),
+         cents: z.coerce.number().int().positive(),
       }),
       taxRate: z.object({
          name: z.string().nonempty(),
-         rate: z.number().int().positive(),
+         rate: z.coerce.number().int().positive(),
          type: z.enum(["inclusive", "exclusive"]),
       }),
       description: z.string().optional(),
@@ -56,27 +56,27 @@ function parseUnknown(invoice: unknown): Result<Invoice> {
 
    const mapLikeItemsSchema = z.map(
       paymentItemSchema,
-      z.number().int().positive(),
+      z.coerce.number().int().positive(),
    )
    const arrayLikeItemsSchema = z.array(
       z.object({
          item: paymentItemSchema,
-         quantity: z.number().int().positive(),
+         quantity: z.coerce.number().int().positive(),
       }),
    )
 
    const schema = z.object({
       invoiceData: z.object({
-         createdDate: z.date(),
-         deliveryDate: z.date(),
-         dueDate: z.date(),
+         createdDate: z.coerce.date(),
+         deliveryDate: z.coerce.date(),
+         dueDate: z.coerce.date(),
          number: z.string().nonempty(),
          numberPrefix: z.string().nonempty(),
          status: z.enum(["unpaid", "partiallyPaid", "paid"]),
          paymentMethod: z.enum(["cash", "card", "transfer"]),
          logoUrl: z.string().optional(),
          note: z.string().optional(),
-         variableSymbol: z.number().int().positive().optional(),
+         variableSymbol: z.coerce.number().int().positive().optional(),
       }),
       payee: z.object({
          name: z.string().nonempty(),

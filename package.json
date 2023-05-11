@@ -1,6 +1,6 @@
 {
    "name": "@flagg2/payment",
-   "version": "0.0.4",
+   "version": "0.0.9",
    "description": "",
    "main": "dist/index.js",
    "module": "dist/index.mjs",
@@ -20,6 +20,7 @@
       "axios": "^1.4.0",
       "clone": "^2.1.2",
       "dayjs": "^1.11.7",
+      "decimal.js": "^10.4.3",
       "easyinvoice": "^3.0.16",
       "stripe": "^12.4.0",
       "zod": "^3.21.4"

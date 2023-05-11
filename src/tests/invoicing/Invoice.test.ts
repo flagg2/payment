@@ -55,7 +55,7 @@ beforeEach(() => {
                   name: "Big Mac",
                   price: {
                      whole: 3,
-                     decimal: 99,
+                     cents: 99,
                   },
                   taxRate: {
                      name: "21%",
@@ -79,7 +79,7 @@ beforeEach(() => {
                   name: "Big Mac",
                   price: {
                      whole: 3,
-                     decimal: 99,
+                     cents: 99,
                   },
                   taxRate: {
                      name: "21%",
