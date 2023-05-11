@@ -1,8 +1,8 @@
-import { IPayment, createPayment } from "./Payment"
-import { Currency, totalInCents } from "./PaymentItem"
 import { AsyncResult, Result } from "@flagg2/result"
 import { Stripe as StripeSdk } from "stripe"
-import { ITaxRate } from "./TaxRate"
+import { TaxRate } from "../payment/TaxRate"
+import { paymentItemQuery } from "../payment/PaymentItem"
+import { Payment, paymentQuery } from "../payment/Payment"
 
 type StripeCheckoutSession = StripeSdk.Checkout.Session
 type StripeLineItem = StripeSdk.Checkout.SessionCreateParams.LineItem
@@ -32,7 +32,7 @@ class Stripe {
    }
 
    public async createCheckoutSession(
-      payment: IPayment<Currency>,
+      payment: Payment,
    ): AsyncResult<StripeCheckoutSession> {
       const lineItems = await this.getLineItems(payment)
       if (lineItems.isErr()) {
@@ -80,7 +80,7 @@ class Stripe {
    }
 
    private async createMissingTaxRates(
-      missing: ITaxRate[],
+      missing: TaxRate[],
    ): AsyncResult<StripeTaxRate[]> {
       const createdTaxRates = await Result.from(
          Promise.all(
@@ -100,9 +100,9 @@ class Stripe {
    }
 
    private async getTaxRateMap(
-      payment: IPayment<Currency>,
-   ): AsyncResult<ReadonlyMap<ITaxRate, StripeTaxRate>> {
-      const taxRateMap = new Map<ITaxRate, StripeTaxRate>()
+      payment: Payment,
+   ): AsyncResult<ReadonlyMap<TaxRate, StripeTaxRate>> {
+      const taxRateMap = new Map<TaxRate, StripeTaxRate>()
       const allRates = await this.takeWhileHasMore(() =>
          this.api.taxRates.list({ limit: 100 }),
       )
@@ -111,8 +111,8 @@ class Stripe {
       }
       const existingTaxRates = allRates.value.filter((rate) => rate.active)
 
-      const taxRatesOfPayment = createPayment(payment).getTaxRates()
-      const toBeCreated: ITaxRate[] = []
+      const taxRatesOfPayment = paymentQuery.getTaxRates(payment)
+      const toBeCreated: TaxRate[] = []
 
       for (const paymentTaxRate of taxRatesOfPayment) {
          const existingTaxRate = existingTaxRates.find(
@@ -152,14 +152,12 @@ class Stripe {
       return Result.ok(taxRateMap)
    }
 
-   private async getLineItems(
-      payment: IPayment<Currency>,
-   ): AsyncResult<StripeLineItem[]> {
+   private async getLineItems(payment: Payment): AsyncResult<StripeLineItem[]> {
       const taxRateMap = await this.getTaxRateMap(payment)
       if (taxRateMap.isErr()) {
          return Result.err(taxRateMap.error)
       }
-      const items = payment.items
+      const { items } = payment
       const lineItems: StripeLineItem[] = []
       for (const [item, quantity] of items.entries()) {
          const taxRate = taxRateMap.value.get(item.taxRate)
@@ -171,7 +169,7 @@ class Stripe {
             tax_rates: [taxRate.id],
             price_data: {
                currency: payment.currency,
-               unit_amount: totalInCents(item.price),
+               unit_amount: paymentItemQuery.getTotalInCents(item),
                product_data: {
                   name: item.name,
                   description: item.description,
@@ -185,13 +183,6 @@ class Stripe {
 
       return Result.ok(lineItems)
    }
-}
-
-export function createStripe(config: {
-   secrets: StripeSecrets
-   urls: StripeUrls
-}): Stripe {
-   return new Stripe(config)
 }
 
 export type { Stripe }

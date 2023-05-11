@@ -5,8 +5,11 @@ dependencies:
     specifier: ^1.2.1
     version: 1.2.1
   '@flagg2/ts-util':
-    specifier: ^1.0.2
-    version: 1.0.2
+    specifier: ^1.0.3
+    version: 1.0.3
+  axios:
+    specifier: ^1.4.0
+    version: 1.4.0
   clone:
     specifier: ^2.1.2
     version: 2.1.2
@@ -19,6 +22,9 @@ dependencies:
   stripe:
     specifier: ^12.4.0
     version: 12.4.0
+  zod:
+    specifier: ^3.21.4
+    version: 3.21.4
 
 devDependencies:
   '@changesets/cli':
@@ -499,8 +505,8 @@ packages:
       dotenv: 16.0.3
     dev: false
 
-  /@flagg2/ts-util@1.0.2:
-    resolution: {integrity: sha512-OtqDMsA7fAImCMJ1JiAQbHYlehyyLo0/aX23E8VbdyTZ8T+fJla5KUFDuUNv21bB3zs4yoeoXSUG1HSWcDPkUA==}
+  /@flagg2/ts-util@1.0.3:
+    resolution: {integrity: sha512-6A76YtneMBrJC/IwaLoeqkQVD9e7DmACqaj+25C3D1nDAnUwxdUWv4JFVykGjZvODAgyCzRSZd/A7RFFge/gmw==}
     dev: false
 
   /@humanwhocodes/config-array@0.11.8:
@@ -1013,6 +1019,16 @@ packages:
     dependencies:
       follow-redirects: 1.15.2
       form-data: 4.0.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /axios@1.4.0:
+    resolution: {integrity: sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==}
+    dependencies:
+      follow-redirects: 1.15.2
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
     dev: false
@@ -3115,6 +3131,10 @@ packages:
       react-is: 17.0.2
     dev: true
 
+  /proxy-from-env@1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+    dev: false
+
   /pseudomap@1.0.2:
     resolution: {integrity: sha512-b/YwNhb8lk1Zz2+bXXpS/LK9OisiZZ1SNsSLxN1x2OXVEhW2Ckr/7mWE5vrC1ZTiJlD9g19jWszTmJsB+oEpFQ==}
     dev: true
@@ -4130,3 +4150,7 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
     dev: true
+
+  /zod@3.21.4:
+    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
+    dev: false
