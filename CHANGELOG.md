@@ -1,5 +1,35 @@
 # @flagg2/payment
 
+## 0.0.14
+
+### Patch Changes
+
+-  use own data structures
+
+## 0.0.13
+
+### Patch Changes
+
+-  add exports
+
+## 0.0.12
+
+### Patch Changes
+
+-  more fns
+
+## 0.0.11
+
+### Patch Changes
+
+-  make companyinfo required for payee
+
+## 0.0.10
+
+### Patch Changes
+
+-  d
+
 ## 0.0.9
 
 ### Patch Changes

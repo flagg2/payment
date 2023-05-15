@@ -4,6 +4,7 @@ import { Payer } from "../payment/Payer"
 import z from "zod"
 import { Payment } from "../payment/Payment"
 import { PaymentItem } from "../payment/PaymentItem"
+import Decimal from "decimal.js"
 
 type Invoice = {
    invoiceData: InvoiceData
@@ -41,27 +42,34 @@ function parseUnknown(invoice: unknown): Result<Invoice> {
 
    const paymentItemSchema = z.object({
       name: z.string().nonempty(),
-      price: z.object({
-         whole: z.coerce.number().int().positive(),
-         cents: z.coerce.number().int().positive(),
-      }),
-      taxRate: z.object({
-         name: z.string().nonempty(),
-         rate: z.coerce.number().int().positive(),
-         type: z.enum(["inclusive", "exclusive"]),
-      }),
+      priceWithoutTax: z.coerce
+         .number()
+         .positive()
+         .transform((value) => new Decimal(value)),
+      taxRate: z.coerce
+         .number()
+         .positive()
+         .transform((value) => new Decimal(value)),
       description: z.string().optional(),
       imageUrl: z.string().optional(),
    })
 
    const mapLikeItemsSchema = z.map(
       paymentItemSchema,
-      z.coerce.number().int().positive(),
+      z.coerce
+         .number()
+         .int()
+         .positive()
+         .transform((value) => new Decimal(value)),
    )
    const arrayLikeItemsSchema = z.array(
       z.object({
          item: paymentItemSchema,
-         quantity: z.coerce.number().int().positive(),
+         quantity: z.coerce
+            .number()
+            .int()
+            .positive()
+            .transform((value) => new Decimal(value)),
       }),
    )
 
@@ -99,7 +107,7 @@ function parseUnknown(invoice: unknown): Result<Invoice> {
       const parsed = schema.parse(invoice)
 
       if (Array.isArray(parsed.payment.items)) {
-         const itemMap = new Map<PaymentItem, number>()
+         const itemMap = new Map<PaymentItem, Decimal>()
          for (const { item, quantity } of parsed.payment.items) {
             itemMap.set(item, quantity)
          }

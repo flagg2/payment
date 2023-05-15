@@ -1,61 +1,54 @@
-import { Price, priceMutation, priceQuery } from "./Price"
-import { TaxRate } from "./TaxRate"
+import { Price } from "./Price"
 import Decimal from "decimal.js"
 
-function getPriceWithoutTax(
-   item: PaymentItem,
-   opts?: {
-      roundCents?: boolean
-   },
-): Price {
-   const { price, taxRate } = item
-   const cents = new Decimal(priceQuery.getAsCents(price, opts))
-   const rate = new Decimal(taxRate.rate)
+function getPriceWithoutTax(item: PaymentItem, quantity?: Decimal): Decimal {
+   const { priceWithoutTax } = item
 
-   let tax: Decimal
-
-   if (taxRate.type === "exclusive") {
-      tax = new Decimal(0)
-   } else {
-      tax = cents.times(rate.dividedBy(100))
-   }
-
-   return priceMutation.fromCents(cents.minus(tax).toNumber(), opts)
+   return priceWithoutTax.times(quantity ?? new Decimal(1))
 }
 
-function getPriceWithTax(
-   item: PaymentItem,
-   opts?: {
-      roundCents?: boolean
-   },
-): Price {
-   const { price, taxRate } = item
-   const cents = new Decimal(priceQuery.getAsCents(price, opts))
-   const rate = new Decimal(taxRate.rate)
+function getPriceWithTax(item: PaymentItem, quantity?: Decimal): Decimal {
+   const { priceWithoutTax, taxRate } = item
 
-   let tax: Decimal
+   const price = priceWithoutTax.times(quantity ?? new Decimal(1))
+   const tax = price.times(taxRate.dividedBy(100))
 
-   if (taxRate.type === "exclusive") {
-      tax = cents.times(rate.dividedBy(100))
-   } else {
-      tax = new Decimal(0)
-   }
-
-   return priceMutation.fromCents(cents.plus(tax).toNumber(), opts)
+   return price.plus(tax)
 }
 
-function getTax(item: PaymentItem): Price {
-   const { price, taxRate } = item
-   const cents = new Decimal(priceQuery.getAsCents(price))
-   const rate = new Decimal(taxRate.rate)
+function getTax(item: PaymentItem, quantity?: Decimal): Decimal {
+   const { priceWithoutTax, taxRate } = item
+   const decimalQuantity = new Decimal(quantity ?? 1)
 
-   return priceMutation.fromCents(cents.times(rate.dividedBy(100)).toNumber())
+   const price = priceWithoutTax.times(decimalQuantity)
+
+   return price.times(taxRate.dividedBy(100))
+}
+
+type PaymentItemWithInclusiveTax = {
+   name: string
+   priceWithTax: Decimal
+   taxRate: Decimal
+   description?: string
+   imageUrl?: string
+}
+
+function fromInclusiveTaxRate(item: PaymentItemWithInclusiveTax) {
+   const { priceWithTax, taxRate } = item
+
+   const mutliplier = new Decimal(1).minus(taxRate.dividedBy(100))
+   const priceWithoutTax = priceWithTax.times(mutliplier)
+
+   return {
+      ...item,
+      priceWithoutTax,
+   }
 }
 
 type PaymentItem = {
    name: string
-   price: Price
-   taxRate: TaxRate
+   priceWithoutTax: Decimal
+   taxRate: Decimal
    description?: string
    imageUrl?: string
 }
@@ -65,4 +58,8 @@ export const paymentItemQuery = {
    getTax,
    getPriceWithTax,
    getPriceWithoutTax,
+}
+
+export const paymentItemMutation = {
+   fromInclusiveTaxRate,
 }

@@ -1,9 +1,9 @@
-// A number between 0 and 100
+import Decimal from "decimal.js"
 
-type TaxRate = {
-   name: string
-   rate: number
-   type: "inclusive" | "exclusive"
+function getName(taxRate: Decimal): string {
+   return `${taxRate.toString()}%`
 }
 
-export type { TaxRate }
+export const taxRateQuery = {
+   getName,
+}

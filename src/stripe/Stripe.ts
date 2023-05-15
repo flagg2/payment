@@ -1,9 +1,10 @@
 import { AsyncResult, Result } from "@flagg2/result"
 import { Stripe as StripeSdk } from "stripe"
-import { TaxRate } from "../payment/TaxRate"
-import { paymentItemQuery } from "../payment/PaymentItem"
 import { Payment, paymentQuery } from "../payment/Payment"
 import { priceQuery } from "../payment/Price"
+import { StructuralMap } from "../utils/StructuralMap"
+import Decimal from "decimal.js"
+import { taxRateQuery } from "../payment/TaxRate"
 
 type StripeCheckoutSession = StripeSdk.Checkout.Session
 type StripeLineItem = StripeSdk.Checkout.SessionCreateParams.LineItem
@@ -81,15 +82,15 @@ class Stripe {
    }
 
    private async createMissingTaxRates(
-      missing: TaxRate[],
+      missing: Decimal[],
    ): AsyncResult<StripeTaxRate[]> {
       const createdTaxRates = await Result.from(
          Promise.all(
             missing.map((rate) =>
                this.api.taxRates.create({
-                  display_name: rate.name,
-                  inclusive: rate.type === "inclusive",
-                  percentage: rate.rate,
+                  display_name: taxRateQuery.getName(rate),
+                  inclusive: false,
+                  percentage: rate.toNumber(),
                }),
             ),
          ),
@@ -102,8 +103,9 @@ class Stripe {
 
    private async getTaxRateMap(
       payment: Payment,
-   ): AsyncResult<ReadonlyMap<TaxRate, StripeTaxRate>> {
-      const taxRateMap = new Map<TaxRate, StripeTaxRate>()
+   ): AsyncResult<StructuralMap<Decimal, StripeTaxRate>> {
+      //TODO: make readonly
+      const taxRateMap = new StructuralMap<Decimal, StripeTaxRate>()
       const allRates = await this.takeWhileHasMore(() =>
          this.api.taxRates.list({ limit: 100 }),
       )
@@ -113,14 +115,13 @@ class Stripe {
       const existingTaxRates = allRates.value.filter((rate) => rate.active)
 
       const taxRatesOfPayment = paymentQuery.getTaxRates(payment)
-      const toBeCreated: TaxRate[] = []
+      const toBeCreated: Decimal[] = []
 
       for (const paymentTaxRate of taxRatesOfPayment) {
          const existingTaxRate = existingTaxRates.find(
             (rate) =>
-               rate.percentage === paymentTaxRate.rate &&
-               rate.display_name === paymentTaxRate.name &&
-               rate.inclusive === (paymentTaxRate.type === "inclusive"),
+               rate.percentage === paymentTaxRate.toNumber() &&
+               rate.display_name === taxRateQuery.getName(paymentTaxRate),
          )
 
          if (existingTaxRate) {
@@ -138,10 +139,8 @@ class Stripe {
       for (const createdTaxRate of createdTaxRates.value) {
          const paymentTaxRate = toBeCreated.find(
             (rate) =>
-               rate.rate === createdTaxRate.percentage &&
-               rate.name === createdTaxRate.display_name &&
-               rate.type ===
-                  (createdTaxRate.inclusive ? "inclusive" : "exclusive"),
+               rate.toNumber() === createdTaxRate.percentage &&
+               taxRateQuery.getName(rate) === createdTaxRate.display_name,
          )
          if (paymentTaxRate) {
             taxRateMap.set(paymentTaxRate, createdTaxRate)
@@ -166,11 +165,11 @@ class Stripe {
             return Result.err(new Error("Tax rate not found"))
          }
          lineItems.push({
-            quantity,
+            quantity: quantity.toNumber(),
             tax_rates: [taxRate.id],
             price_data: {
                currency: payment.currency,
-               unit_amount: priceQuery.getAsCents(item.price),
+               unit_amount: priceQuery.toCents(item.priceWithoutTax).toNumber(),
                product_data: {
                   name: item.name,
                   description: item.description,

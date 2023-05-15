@@ -1,114 +1,69 @@
 import { describe, expect, it } from "vitest"
-import { PaymentItem, paymentItemQuery } from "../../payment/PaymentItem"
-
-const inclusiveTax20: PaymentItem = {
-   name: "Test Item",
-   price: {
-      whole: 3,
-      cents: 99,
-   },
-   taxRate: {
-      name: "20%",
-      rate: 20,
-      type: "inclusive",
-   },
-}
+import {
+   PaymentItem,
+   paymentItemMutation,
+   paymentItemQuery,
+} from "../../payment/PaymentItem"
+import Decimal from "decimal.js"
 
 const exclusiveTax20: PaymentItem = {
    name: "Test Item",
-   price: {
-      whole: 34,
-      cents: 53,
-   },
-   taxRate: {
-      name: "20%",
-      rate: 20,
-      type: "exclusive",
-   },
-}
-
-const inclusiveTax53: PaymentItem = {
-   name: "Test Item",
-   price: {
-      whole: 34,
-      cents: 53,
-   },
-   taxRate: {
-      name: "53%",
-      rate: 53,
-      type: "inclusive",
-   },
+   priceWithoutTax: new Decimal(34.53),
+   taxRate: new Decimal(20),
 }
 
 const exclusiveTax53: PaymentItem = {
    name: "Test Item",
-   price: {
-      whole: 3,
-      cents: 99,
-   },
-   taxRate: {
-      name: "53%",
-      rate: 53,
-      type: "exclusive",
-   },
+   priceWithoutTax: new Decimal(3.99),
+   taxRate: new Decimal(53),
+}
+
+const mcFlurry: PaymentItem = {
+   name: "McFlurry",
+   priceWithoutTax: new Decimal(2.69),
+   taxRate: new Decimal(21),
 }
 
 describe("PaymentItem - getTax", () => {
-   it("Should work with inclusive tax 20", () => {
-      expect(paymentItemQuery.getTax(inclusiveTax20)).toStrictEqual({
-         whole: 0,
-         cents: 80,
-      })
-   })
-
    it("Should work with exclusive tax 20", () => {
-      expect(paymentItemQuery.getTax(exclusiveTax20)).toStrictEqual({
-         whole: 6,
-         cents: 91,
-      })
-   })
-
-   it("Should work with inclusive tax 53", () => {
-      expect(paymentItemQuery.getTax(inclusiveTax53)).toStrictEqual({
-         whole: 18,
-         cents: 30,
-      })
+      expect(paymentItemQuery.getTax(exclusiveTax20)).toEqual(
+         new Decimal(6.906),
+      )
    })
 
    it("Should work with exclusive tax 53", () => {
-      expect(paymentItemQuery.getTax(exclusiveTax53)).toStrictEqual({
-         whole: 2,
-         cents: 11,
-      })
+      expect(paymentItemQuery.getTax(exclusiveTax53)).toEqual(
+         new Decimal(2.1147),
+      )
+   })
+
+   it("Should work with inclusive tax 21", () => {
+      expect(paymentItemQuery.getTax(mcFlurry)).toEqual(new Decimal(0.5649))
    })
 })
 
 describe("PaymentItem - getPriceWithTax", () => {
-   it("Should work with inclusive tax 20", () => {
-      expect(paymentItemQuery.getPriceWithTax(inclusiveTax20)).toStrictEqual({
-         whole: 3,
-         cents: 99,
-      })
-   })
-
    it("Should work with exclusive tax 20", () => {
-      expect(paymentItemQuery.getPriceWithTax(exclusiveTax20)).toStrictEqual({
-         whole: 41,
-         cents: 44,
-      })
-   })
-
-   it("Should work with inclusive tax 53", () => {
-      expect(paymentItemQuery.getPriceWithTax(inclusiveTax53)).toStrictEqual({
-         whole: 34,
-         cents: 53,
-      })
+      expect(paymentItemQuery.getPriceWithTax(exclusiveTax20)).toEqual(
+         new Decimal(41.436),
+      )
    })
 
    it("Should work with exclusive tax 53", () => {
-      expect(paymentItemQuery.getPriceWithTax(exclusiveTax53)).toStrictEqual({
-         whole: 6,
-         cents: 10,
+      expect(paymentItemQuery.getPriceWithTax(exclusiveTax53)).toEqual(
+         new Decimal(6.1047),
+      )
+   })
+})
+
+describe("From inclusive tax rate", () => {
+   it("Should work with inclusive tax 21", () => {
+      const item = paymentItemMutation.fromInclusiveTaxRate({
+         name: "McFlurry",
+         priceWithTax: new Decimal(3.25),
+         taxRate: new Decimal(21),
       })
+
+      expect(item.priceWithoutTax).toEqual(new Decimal(2.5675))
    })
 })

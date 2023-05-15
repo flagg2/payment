@@ -1,53 +1,69 @@
 import Decimal from "decimal.js"
 import { Currency } from "../common"
 import { PaymentItem, paymentItemQuery } from "./PaymentItem"
-import { Price, priceMutation, priceQuery } from "./Price"
-import { TaxRate } from "./TaxRate"
+import { StructuralMap } from "../utils/StructuralMap"
+import { StructuralSet } from "../utils/StructuralSet"
+import { stringifyObjectWithOrderedKeys } from "../utils/stringifyWithOrderedKeys"
 
-function getTaxRates(payment: Payment): Set<TaxRate> {
-   const taxRates = new Set<TaxRate>()
+function getTaxRates(payment: Payment): StructuralSet<Decimal> {
+   const taxRates = new StructuralSet<Decimal>()
    for (const [item] of payment.items) {
       taxRates.add(item.taxRate)
    }
    return taxRates
 }
 
-function getPriceWithoutTax(payment: Payment): Price {
+function getPriceWithoutTax(payment: Payment): Decimal {
    return getPrice(payment, paymentItemQuery.getPriceWithoutTax)
 }
 
-function getPriceWithTax(payment: Payment): Price {
+function getPriceWithTax(payment: Payment): Decimal {
    return getPrice(payment, paymentItemQuery.getPriceWithTax)
+}
+
+function getTaxAmountsForTaxRates(
+   payment: Payment,
+): StructuralMap<Decimal, Decimal> {
+   // TODO: map doesnt work how i thought, fix
+   const taxes = new StructuralMap<Decimal, Decimal>()
+   for (const taxRate of getTaxRates(payment)) {
+      taxes.set(taxRate, getTaxAmountForTaxRate(payment, taxRate))
+   }
+   return taxes
+}
+
+function getTaxAmountForTaxRate(payment: Payment, taxRate: Decimal): Decimal {
+   let tax = new Decimal(0)
+   for (const [item, quantity] of payment.items) {
+      if (
+         stringifyObjectWithOrderedKeys(item.taxRate) ===
+         stringifyObjectWithOrderedKeys(taxRate)
+      ) {
+         const itemTax = paymentItemQuery.getTax(item, quantity)
+         tax = tax.plus(itemTax)
+      }
+   }
+   return tax
 }
 
 function getPrice(
    payment: Payment,
-   itemFn: (
-      item: PaymentItem,
-      opts?: {
-         roundCents?: boolean
-      },
-   ) => Price,
-): Price {
-   let priceCents = new Decimal(0)
+   itemFn: (item: PaymentItem, quantity?: Decimal) => Decimal,
+): Decimal {
+   let price = new Decimal(0)
    for (const [item, quantity] of payment.items) {
-      const itemPrice = itemFn(item, {
-         roundCents: false,
-      })
-      const itemPriceCents = new Decimal(
-         priceQuery.getAsCents(itemPrice, { roundCents: false }),
-      )
-      priceCents = priceCents.plus(itemPriceCents.times(quantity))
+      const itemPrice = itemFn(item, quantity)
+      price = price.plus(itemPrice)
    }
-   return priceMutation.fromCents(priceCents.toNumber())
+   return price
 }
 
 function getItemsWithDefaultTaxRate(
    payment: Payment,
-): Map<Omit<PaymentItem, "taxRate"> & { taxRate: TaxRate }, number> {
+): Map<Omit<PaymentItem, "taxRate"> & { taxRate: Decimal }, Decimal> {
    const items = new Map<
-      Omit<PaymentItem, "taxRate"> & { taxRate: TaxRate },
-      number
+      Omit<PaymentItem, "taxRate"> & { taxRate: Decimal },
+      Decimal
    >()
    for (const [item, quantity] of payment.items) {
       items.set(
@@ -63,19 +79,21 @@ function getItemsWithDefaultTaxRate(
 
 function addItem(
    payment: Payment,
-   item: Omit<PaymentItem, "taxRate"> & { taxRate: TaxRate },
-   quantity: number,
+   item: Omit<PaymentItem, "taxRate"> & { taxRate: Decimal },
+   quantity: Decimal,
 ): void {
    payment.items.set(item, quantity)
 }
 
 type Payment = {
-   items: Map<PaymentItem, number>
+   items: Map<PaymentItem, Decimal>
    currency: Currency
 }
 
 export type { Payment }
 export const paymentQuery = {
+   getTaxAmountsForTaxRates,
+   getTaxAmountForTaxRate,
    getTaxRates,
    getItemsWithDefaultTaxRate,
    getPriceWithoutTax,

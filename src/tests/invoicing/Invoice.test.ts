@@ -1,7 +1,10 @@
 import { beforeEach, expect, it, describe } from "vitest"
 import { Invoice, invoiceQuery } from "../../invoicing/Invoice"
+import Decimal from "decimal.js"
 
-let mapItemsInvoice: Invoice
+let mapItemsInvoice: any
+let mapItemsInvoiceExpected: Invoice
+
 let arrayItemsInvoice: any
 
 beforeEach(() => {
@@ -53,17 +56,27 @@ beforeEach(() => {
             [
                {
                   name: "Big Mac",
-                  price: {
-                     whole: 3,
-                     cents: 99,
-                  },
-                  taxRate: {
-                     name: "21%",
-                     rate: 21,
-                     type: "inclusive",
-                  },
+                  priceWithoutTax: 3.99,
+                  taxRate: 21,
                },
                1,
+            ],
+         ]),
+      },
+   }
+
+   mapItemsInvoiceExpected = {
+      ...mapItemsInvoice,
+      payment: {
+         ...mapItemsInvoice.payment,
+         items: new Map([
+            [
+               {
+                  name: "Big Mac",
+                  priceWithoutTax: new Decimal(3.99),
+                  taxRate: new Decimal(21),
+               },
+               new Decimal(1),
             ],
          ]),
       },
@@ -77,15 +90,8 @@ beforeEach(() => {
             {
                item: {
                   name: "Big Mac",
-                  price: {
-                     whole: 3,
-                     cents: 99,
-                  },
-                  taxRate: {
-                     name: "21%",
-                     rate: 21,
-                     type: "inclusive",
-                  },
+                  priceWithoutTax: 3.99,
+                  taxRate: 21,
                },
                quantity: 1,
             },
@@ -97,11 +103,12 @@ beforeEach(() => {
 describe("Invoice with map items", () => {
    it("Should validate a correct invoice", () => {
       const result = invoiceQuery.parseUnknown(mapItemsInvoice)
+      console.log(result)
       expect(result.isOk()).toBe(true)
       if (result.isErr()) return
 
       const { value } = result
-      expect(value).toEqual(mapItemsInvoice)
+      expect(value).toStrictEqual(mapItemsInvoiceExpected)
    })
 
    it("Should not validate an invoice with missing required fields", () => {
@@ -136,30 +143,16 @@ describe("Invoice with map items", () => {
                [
                   {
                      name: "Big Mac",
-                     price: {
-                        whole: 3,
-                        decimal: 99,
-                     },
-                     taxRate: {
-                        name: "21%",
-                        rate: 21,
-                        type: "inclusive",
-                     },
+                     priceWithoutTax: 3.99,
+                     taxRate: 21,
                   },
                   1,
                ],
                [
                   {
                      name: "Big Mac",
-                     price: {
-                        whole: 3,
-                        decimal: 99,
-                     },
-                     taxRate: {
-                        name: "21%",
-                        rate: 21,
-                        type: "inclusive",
-                     },
+                     priceWithoutTax: 3.99,
+                     taxRate: 21,
                   },
                   1,
                ],
@@ -167,6 +160,27 @@ describe("Invoice with map items", () => {
          },
       })
       expect(result.isOk()).toBe(false)
+   })
+
+   it("Should accept decimal class values", () => {
+      const result = invoiceQuery.parseUnknown({
+         ...mapItemsInvoice,
+         payment: {
+            ...mapItemsInvoice.payment,
+            items: new Map([
+               [
+                  {
+                     name: "Big Mac",
+                     priceWithoutTax: new Decimal(3.99),
+                     taxRate: new Decimal(21),
+                  },
+                  new Decimal(1),
+               ],
+            ]),
+         },
+      })
+      expect(result.isOk()).toBe(true)
+      expect(result.unwrap()).toStrictEqual(mapItemsInvoiceExpected)
    })
 })
 
@@ -177,7 +191,7 @@ describe("Invoice with array items", () => {
       if (result.isErr()) return
 
       const { value } = result
-      expect(value).toEqual(mapItemsInvoice)
+      expect(value).toEqual(mapItemsInvoiceExpected)
    })
 
    it("Should not validate an invoice with missing required fields", () => {
@@ -212,10 +226,7 @@ describe("Invoice with array items", () => {
                {
                   item: {
                      name: "Big Mac",
-                     price: {
-                        whole: 3,
-                        decimal: 99,
-                     },
+                     priceWithoutTax: 3.99,
                      taxRate: {
                         name: "21%",
                         rate: 21,
@@ -227,7 +238,7 @@ describe("Invoice with array items", () => {
                {
                   item: {
                      name: "Big Mac",
-                     price: {
+                     priceWithoutTax: {
                         whole: 3,
                         decimal: 99,
                      },

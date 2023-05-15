@@ -1,6 +1,6 @@
 {
    "name": "@flagg2/payment",
-   "version": "0.0.9",
+   "version": "0.0.14",
    "description": "",
    "main": "dist/index.js",
    "module": "dist/index.mjs",
@@ -36,7 +36,6 @@
       "eslint-plugin-import": "^2.27.5",
       "eslint-plugin-n": "^15.6.1",
       "eslint-plugin-promise": "^6.1.1",
-      "prettier": "2.8.3",
       "tsup": "^6.7.0",
       "typescript": "^5.0.4",
       "vitest": "^0.29.2"

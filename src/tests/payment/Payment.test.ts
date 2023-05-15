@@ -1,71 +1,122 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import { Payment, paymentMutation, paymentQuery } from "../../payment/Payment"
 import { PaymentItem } from "../../payment/PaymentItem"
+import { StructuralMap } from "../../utils/StructuralMap"
+import { Price } from "../../payment/Price"
+import Decimal from "decimal.js"
 
 let payment1: Payment
 const bigMac: PaymentItem = {
    name: "Big Mac",
-   price: {
-      whole: 3,
-      cents: 99,
-   },
-   taxRate: {
-      name: "21%",
-      rate: 21,
-      type: "inclusive",
-   },
+   priceWithoutTax: new Decimal(3.99),
+   taxRate: new Decimal(21),
 }
 
-describe("Payment - One item", () => {
-   beforeEach(() => {
-      payment1 = {
-         currency: "EUR",
-         items: new Map([]),
-      }
+const fries: PaymentItem = {
+   name: "Fries",
+   priceWithoutTax: new Decimal(2.15),
+   taxRate: new Decimal(21),
+}
 
-      paymentMutation.addItem(payment1, bigMac, 1)
-   })
+describe("Price calculation", () => {
+   describe("One item", () => {
+      beforeEach(() => {
+         payment1 = {
+            currency: "EUR",
+            items: new Map([]),
+         }
 
-   it("Should return correct price with tax", () => {
-      expect(payment1.items.size).toBe(1)
-      expect(paymentQuery.getPriceWithTax(payment1)).toStrictEqual({
-         whole: 3,
-         cents: 99,
+         paymentMutation.addItem(payment1, bigMac, new Decimal(1))
+      })
+
+      it("Should return correct price with tax", () => {
+         expect(payment1.items.size).toBe(1)
+         expect(paymentQuery.getPriceWithTax(payment1)).toStrictEqual(
+            new Decimal(4.8279),
+         )
+      })
+
+      it("Should return correct price without tax", () => {
+         expect(payment1.items.size).toBe(1)
+         expect(paymentQuery.getPriceWithoutTax(payment1)).toStrictEqual(
+            new Decimal(3.99),
+         )
       })
    })
 
-   it("Should return correct price without tax", () => {
-      expect(payment1.items.size).toBe(1)
-      expect(paymentQuery.getPriceWithoutTax(payment1)).toStrictEqual({
-         whole: 3,
-         cents: 15,
+   describe("Same item many times", () => {
+      beforeEach(() => {
+         payment1 = {
+            currency: "EUR",
+            items: new Map([]),
+         }
+
+         paymentMutation.addItem(payment1, bigMac, new Decimal(31))
+      })
+
+      it("Should return correct price with tax", () => {
+         expect(payment1.items.size).toBe(1)
+         expect(paymentQuery.getPriceWithTax(payment1)).toStrictEqual(
+            new Decimal(149.6649),
+         )
+      })
+
+      it("Should return correct price without tax", () => {
+         expect(payment1.items.size).toBe(1)
+         expect(paymentQuery.getPriceWithoutTax(payment1)).toStrictEqual(
+            new Decimal(123.69),
+         )
       })
    })
 })
 
-describe("Payment - Same item many times", () => {
-   beforeEach(() => {
+describe("Tax map", () => {
+   it("Should work with one item", () => {
       payment1 = {
          currency: "EUR",
          items: new Map([]),
       }
 
-      paymentMutation.addItem(payment1, bigMac, 31)
+      paymentMutation.addItem(payment1, bigMac, new Decimal(1))
+
+      const expected = new StructuralMap<object, Price>()
+      expected.set(new Decimal(21), new Decimal(0.8379))
+
+      expect(paymentQuery.getTaxAmountsForTaxRates(payment1)).toStrictEqual(
+         expected,
+      )
    })
 
-   it("Should return correct price with tax", () => {
-      expect(payment1.items.size).toBe(1)
-      expect(paymentQuery.getPriceWithTax(payment1)).toStrictEqual({
-         whole: 123,
-         cents: 69,
-      })
+   it("Should work with many items", () => {
+      payment1 = {
+         currency: "EUR",
+         items: new Map([]),
+      }
+
+      paymentMutation.addItem(payment1, bigMac, new Decimal(31))
+
+      const expected = new StructuralMap()
+      expected.set(new Decimal(21), new Decimal(25.9749))
+
+      expect(paymentQuery.getTaxAmountsForTaxRates(payment1)).toStrictEqual(
+         expected,
+      )
    })
 
-   it("Should return correct price without tax", () => {
-      expect(payment1.items.size).toBe(1)
-      expect(paymentQuery.getPriceWithoutTax(payment1)).toStrictEqual({
-         whole: 97,
-         cents: 72,
-      })
+   it("Should group items with same tax rate", () => {
+      payment1 = {
+         currency: "EUR",
+         items: new Map([]),
+      }
+
+      paymentMutation.addItem(payment1, bigMac, new Decimal(1))
+      paymentMutation.addItem(payment1, fries, new Decimal(1))
+
+      const structuralMap = paymentQuery.getTaxAmountsForTaxRates(payment1)
+
+      expect(structuralMap.size).toBe(1)
+      expect(structuralMap.get(bigMac.taxRate)).toStrictEqual(
+         new Decimal(1.2894),
+      )
    })
 })
