@@ -11,3 +11,5 @@ export const stripeMutation = {
    createStripeSdk,
    createCheckoutSession,
 }
+
+export type { StripeSdk }

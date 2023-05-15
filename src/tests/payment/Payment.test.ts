@@ -71,7 +71,7 @@ describe("Price calculation", () => {
 })
 
 describe("Tax map", () => {
-   it("Should work with one item", () => {
+   it.only("Should work with one item", () => {
       payment1 = {
          currency: "EUR",
          items: new Map([]),
@@ -81,6 +81,8 @@ describe("Tax map", () => {
 
       const expected = new StructuralMap<object, Price>()
       expected.set(new Decimal(21), new Decimal(0.8379))
+
+      console.log(paymentQuery.getTaxAmountsForTaxRates(payment1).keys()[0])
 
       expect(paymentQuery.getTaxAmountsForTaxRates(payment1)).toStrictEqual(
          expected,

@@ -2,12 +2,15 @@ import { stringifyObjectWithOrderedKeys } from "./stringifyWithOrderedKeys"
 
 export class StructuralMap<K extends object, V> {
    private readonly map: Map<string, V>
+   private readonly keyMap: Map<string, K>
+
    private readonly keyGenerator: (obj: K) => string
 
    public constructor(
       keyGenerator: (obj: K) => string = stringifyObjectWithOrderedKeys,
    ) {
       this.map = new Map<string, V>()
+      this.keyMap = new Map<string, K>()
       this.keyGenerator = keyGenerator
    }
 
@@ -17,8 +20,8 @@ export class StructuralMap<K extends object, V> {
 
    public set(key: K, value: V): this {
       const stringKey = this.generateKey(key)
-      console.log({ stringKey })
       this.map.set(stringKey, value)
+      this.keyMap.set(stringKey, key)
       return this
    }
 
@@ -42,9 +45,7 @@ export class StructuralMap<K extends object, V> {
    }
 
    public keys(): K[] {
-      return Array.from(this.map.keys()).map(
-         (stringKey) => JSON.parse(stringKey) as K,
-      )
+      return Array.from(this.keyMap.values())
    }
 
    public values(): V[] {
@@ -52,9 +53,9 @@ export class StructuralMap<K extends object, V> {
    }
 
    public entries(): [K, V][] {
-      return Array.from(this.map.entries()).map(([stringKey, value]) => [
-         JSON.parse(stringKey) as K,
+      return Array.from(this.keyMap.entries()).map(([key, value]) => [
          value,
+         this.map.get(key)!,
       ])
    }
 

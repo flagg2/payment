@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { StructuralMap } from "../../utils/StructuralMap"
+import Decimal from "decimal.js"
 
 describe("StructuralMap", () => {
    it("should set and get a key-value pair", () => {
@@ -125,6 +126,25 @@ describe("StructuralMap", () => {
       structuralMap.set(key2, value2)
       const entries = structuralMap.entries()
       expect(entries).toEqual([
+         [key1, value1],
+         [key2, value2],
+      ])
+   })
+
+   it("should work with decimals as keys", () => {
+      const structuralMap = new StructuralMap()
+      const key1 = new Decimal(1.0)
+      const key2 = new Decimal(2.0)
+      const value1 = "test1"
+      const value2 = "test2"
+      structuralMap.set(key1, value1)
+      structuralMap.set(key2, value2)
+      expect(structuralMap.get(key1)).toBe(value1)
+      expect(structuralMap.get(key2)).toBe(value2)
+      expect(structuralMap.size).toBe(2)
+      expect(structuralMap.values()).toEqual([value1, value2])
+      expect(structuralMap.keys()).toEqual([key1, key2])
+      expect(structuralMap.entries()).toEqual([
          [key1, value1],
          [key2, value2],
       ])

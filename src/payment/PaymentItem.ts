@@ -1,4 +1,3 @@
-import { Price } from "./Price"
 import Decimal from "decimal.js"
 
 function getPriceWithoutTax(item: PaymentItem, quantity?: Decimal): Decimal {
@@ -33,7 +32,7 @@ type PaymentItemWithInclusiveTax = {
    imageUrl?: string
 }
 
-function fromInclusiveTaxRate(item: PaymentItemWithInclusiveTax) {
+function fromInclusiveTaxRate(item: PaymentItemWithInclusiveTax): PaymentItem {
    const { priceWithTax, taxRate } = item
 
    const mutliplier = new Decimal(1).minus(taxRate.dividedBy(100))

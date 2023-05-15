@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { StructuralSet } from "../../utils/StructuralSet"
+import Decimal from "decimal.js"
 
 describe("StructuralSet", () => {
    it("should add an object to the set", () => {
@@ -57,7 +58,7 @@ describe("StructuralSet", () => {
       const structuralSet = new StructuralSet()
       const obj = { a: 1, b: 2 }
       structuralSet.add(obj)
-      const entries = structuralSet.entries()
+      const entries = structuralSet.values()
       expect(entries).toEqual([obj])
    })
    it("should handle complex objects", () => {
@@ -115,7 +116,19 @@ describe("StructuralSet", () => {
       const structuralSet = new StructuralSet()
       const obj = { a: 1, b: { c: 2, d: 3 }, e: [4, 5, 6] }
       structuralSet.add(obj)
-      const entries = structuralSet.entries()
+      const entries = structuralSet.values()
       expect(entries).toEqual([obj])
+   })
+
+   it("should iterate over decimals if used as keys", () => {
+      const structuralSet = new StructuralSet()
+      const obj1 = new Decimal(1)
+      const obj2 = new Decimal(2)
+      structuralSet.add(obj1)
+      structuralSet.add(obj2)
+      expect(structuralSet.size()).toBe(2)
+
+      const values = structuralSet.values()
+      expect(values).toEqual([obj1, obj2])
    })
 })

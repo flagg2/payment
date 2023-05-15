@@ -33,7 +33,7 @@ export async function getTaxRateMap(
    client: StripeSdk,
    payment: Payment,
 ): AsyncResult<StructuralMap<Decimal, StripeTaxRate>> {
-   //TODO: make readonly
+   // TODO: make readonly
    const taxRateMap = new StructuralMap<Decimal, StripeTaxRate>()
    const allRates = await takeWhileHasMore(() =>
       client.taxRates.list({ limit: 100 }),

@@ -1,5 +1,17 @@
 # @flagg2/payment
 
+## 0.0.16
+
+### Patch Changes
+
+-  add taxratequery
+
+## 0.0.15
+
+### Patch Changes
+
+-  func style, use decimal
+
 ## 0.0.14
 
 ### Patch Changes
