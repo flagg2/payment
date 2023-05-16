@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { Payer, payerQuery } from "../../payment/Payer"
+import { Payer } from "../../payment/Payer"
 
 function payerWithVat(vat: string): Payer {
    return {
@@ -20,7 +20,7 @@ function payerWithVat(vat: string): Payer {
 describe("Check VAT", () => {
    it("Should pass with valid VAT", async () => {
       const VAT = "SK2020382056"
-      const isValid = await payerQuery.hasValidVat(payerWithVat(VAT))
+      const isValid = await Payer.hasValidVat(payerWithVat(VAT))
       expect(isValid.isErr()).toBe(false)
       if (isValid.isOk()) {
          expect(isValid.value).toBe(true)
@@ -29,7 +29,7 @@ describe("Check VAT", () => {
 
    it("Should pass with foreign VAT", async () => {
       const VAT = "FR63382357721" // psg vat
-      const isValid = await payerQuery.hasValidVat(payerWithVat(VAT))
+      const isValid = await Payer.hasValidVat(payerWithVat(VAT))
       console.log(isValid)
       expect(isValid.isErr()).toBe(false)
       if (isValid.isOk()) {
@@ -39,7 +39,7 @@ describe("Check VAT", () => {
 
    it("Should fail without prefix", async () => {
       const VAT = "2020382056"
-      const isValid = await payerQuery.hasValidVat(payerWithVat(VAT))
+      const isValid = await Payer.hasValidVat(payerWithVat(VAT))
       expect(isValid.isErr()).toBe(false)
       if (isValid.isOk()) {
          expect(isValid.value).toBe(false)
@@ -48,7 +48,7 @@ describe("Check VAT", () => {
 
    it("Should fail with invalid VAT", async () => {
       const VAT = "SK2020382057"
-      const isValid = await payerQuery.hasValidVat(payerWithVat(VAT))
+      const isValid = await Payer.hasValidVat(payerWithVat(VAT))
       expect(isValid.isErr()).toBe(false)
       if (isValid.isOk()) {
          expect(isValid.value).toBe(false)

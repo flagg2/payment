@@ -52,13 +52,11 @@ type PaymentItem = {
    imageUrl?: string
 }
 
-export type { PaymentItem }
-export const paymentItemQuery = {
+const PaymentItem = {
    getTax,
    getPriceWithTax,
    getPriceWithoutTax,
-}
-
-export const paymentItemMutation = {
    fromInclusiveTaxRate,
 }
+
+export { PaymentItem }

@@ -112,8 +112,8 @@ async function hasValidVat(payer: Payer): AsyncResult<boolean> {
    return Result.ok(isValid)
 }
 
-export type { Payer }
-
-export const payerQuery = {
+const Payer = {
    hasValidVat,
 }
+
+export { Payer }

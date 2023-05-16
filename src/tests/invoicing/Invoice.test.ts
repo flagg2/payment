@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, describe } from "vitest"
-import { Invoice, invoiceQuery } from "../../invoicing/Invoice"
+import { Invoice } from "../../invoicing/Invoice"
 import Decimal from "decimal.js"
 
 let mapItemsInvoice: any
@@ -102,7 +102,7 @@ beforeEach(() => {
 
 describe("Invoice with map items", () => {
    it("Should validate a correct invoice", () => {
-      const result = invoiceQuery.parseUnknown(mapItemsInvoice)
+      const result = Invoice.parseUnknown(mapItemsInvoice)
       console.log(result)
       expect(result.isOk()).toBe(true)
       if (result.isErr()) return
@@ -112,7 +112,7 @@ describe("Invoice with map items", () => {
    })
 
    it("Should not validate an invoice with missing required fields", () => {
-      const result = invoiceQuery.parseUnknown({
+      const result = Invoice.parseUnknown({
          ...mapItemsInvoice,
          payee: {
             ...mapItemsInvoice.payee,
@@ -123,7 +123,7 @@ describe("Invoice with map items", () => {
    })
 
    it("Should not validate an invoice with invalid fields", () => {
-      const result = invoiceQuery.parseUnknown({
+      const result = Invoice.parseUnknown({
          ...mapItemsInvoice,
          invoiceData: {
             ...mapItemsInvoice.invoiceData,
@@ -135,7 +135,7 @@ describe("Invoice with map items", () => {
 
    // TODO: later
    it.skip("Should not validate an invoice with duplicate items", () => {
-      const result = invoiceQuery.parseUnknown({
+      const result = Invoice.parseUnknown({
          ...mapItemsInvoice,
          payment: {
             ...mapItemsInvoice.payment,
@@ -163,7 +163,7 @@ describe("Invoice with map items", () => {
    })
 
    it("Should accept decimal class values", () => {
-      const result = invoiceQuery.parseUnknown({
+      const result = Invoice.parseUnknown({
          ...mapItemsInvoice,
          payment: {
             ...mapItemsInvoice.payment,
@@ -186,7 +186,7 @@ describe("Invoice with map items", () => {
 
 describe("Invoice with array items", () => {
    it("Should validate a correct invoice", () => {
-      const result = invoiceQuery.parseUnknown(arrayItemsInvoice)
+      const result = Invoice.parseUnknown(arrayItemsInvoice)
       expect(result.isOk()).toBe(true)
       if (result.isErr()) return
 
@@ -195,7 +195,7 @@ describe("Invoice with array items", () => {
    })
 
    it("Should not validate an invoice with missing required fields", () => {
-      const result = invoiceQuery.parseUnknown({
+      const result = Invoice.parseUnknown({
          ...arrayItemsInvoice,
          payee: {
             ...arrayItemsInvoice.payee,
@@ -206,7 +206,7 @@ describe("Invoice with array items", () => {
    })
 
    it("Should not validate an invoice with invalid fields", () => {
-      const result = invoiceQuery.parseUnknown({
+      const result = Invoice.parseUnknown({
          ...arrayItemsInvoice,
          invoiceData: {
             ...arrayItemsInvoice.invoiceData,
@@ -218,7 +218,7 @@ describe("Invoice with array items", () => {
 
    // TODO: later
    it.skip("Should not validate an invoice with duplicate items", () => {
-      const result = invoiceQuery.parseUnknown({
+      const result = Invoice.parseUnknown({
          ...arrayItemsInvoice,
          payment: {
             ...arrayItemsInvoice.payment,

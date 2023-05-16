@@ -1,8 +1,8 @@
 import { Stripe as StripeSdk } from "stripe"
-import { Payment, paymentQuery } from "../payment/Payment"
+import { Payment } from "../payment/Payment"
 import { AsyncResult, Result } from "@flagg2/result"
 import Decimal from "decimal.js"
-import { taxRateQuery } from "../payment/TaxRate"
+import { TaxRate } from "../payment/TaxRate"
 import { StructuralMap } from "../utils/StructuralMap"
 import { takeWhileHasMore } from "./utils"
 
@@ -16,7 +16,7 @@ async function createMissingTaxRates(
       Promise.all(
          toCreate.map((rate) =>
             client.taxRates.create({
-               display_name: taxRateQuery.getName(rate),
+               display_name: TaxRate.getDisplayName(rate),
                inclusive: false,
                percentage: rate.toNumber(),
             }),
@@ -43,14 +43,14 @@ export async function getTaxRateMap(
    }
    const existingTaxRates = allRates.value.filter((rate) => rate.active)
 
-   const taxRatesOfPayment = paymentQuery.getTaxRates(payment)
+   const taxRatesOfPayment = Payment.getTaxRates(payment)
    const toBeCreated: Decimal[] = []
 
    for (const paymentTaxRate of taxRatesOfPayment) {
       const existingTaxRate = existingTaxRates.find(
          (rate) =>
             rate.percentage === paymentTaxRate.toNumber() &&
-            rate.display_name === taxRateQuery.getName(paymentTaxRate),
+            rate.display_name === TaxRate.getDisplayName(paymentTaxRate),
       )
 
       if (existingTaxRate) {
@@ -69,7 +69,7 @@ export async function getTaxRateMap(
       const paymentTaxRate = toBeCreated.find(
          (rate) =>
             rate.toNumber() === createdTaxRate.percentage &&
-            taxRateQuery.getName(rate) === createdTaxRate.display_name,
+            TaxRate.getDisplayName(rate) === createdTaxRate.display_name,
       )
       if (paymentTaxRate) {
          taxRateMap.set(paymentTaxRate, createdTaxRate)

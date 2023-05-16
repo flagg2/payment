@@ -1,14 +1,14 @@
 import Decimal from "decimal.js"
 import { Currency } from "../common"
 
-function roundTo(price: Price, precision: "whole" | "cents"): Price {
+function roundTo(price: Decimal, precision: "whole" | "cents"): Decimal {
    if (precision === "whole") {
       return price.round()
    }
    return price.times(100).round().dividedBy(100)
 }
 
-function asWholeAndCents(price: Price): {
+function asWholeAndCents(price: Decimal): {
    whole: Decimal
    cents: Decimal
 } {
@@ -28,15 +28,15 @@ function getCurrencyString(currency: Currency): string {
    }
 }
 
-function fromNumber(price: number): Price {
+function fromNumber(price: number): Decimal {
    return new Decimal(price)
 }
 
-function toCents(price: Price): Price {
+function toCents(price: Decimal): Decimal {
    return price.times(100)
 }
 
-function getFormatted(price: Price, currency: Currency): string {
+function getFormatted(price: Decimal, currency: Currency): string {
    const split = asWholeAndCents(price)
    return `${split.whole.toString()}.${split.cents.toString()} ${getCurrencyString(
       currency,
@@ -45,13 +45,12 @@ function getFormatted(price: Price, currency: Currency): string {
 
 type Price = Decimal
 
-export type { Price }
-export const priceQuery = {
+const Price = {
    getFormatted,
    roundTo,
    asWholeAndCents,
    toCents,
-}
-export const priceMutation = {
    fromNumber,
 }
+
+export { Price }

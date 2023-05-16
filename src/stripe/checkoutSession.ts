@@ -1,7 +1,7 @@
 import { Stripe as StripeSdk } from "stripe"
 import { Payment } from "../payment/Payment"
 import { AsyncResult, Result } from "@flagg2/result"
-import { priceQuery } from "../payment/Price"
+import { Price } from "../payment/Price"
 import { getTaxRateMap } from "./taxRate"
 
 type StripeCheckoutSession = StripeSdk.Checkout.Session
@@ -57,7 +57,7 @@ async function getLineItems(
          tax_rates: [taxRate.id],
          price_data: {
             currency: payment.currency,
-            unit_amount: priceQuery.toCents(item.priceWithoutTax).toNumber(),
+            unit_amount: Price.toCents(item.priceWithoutTax).toNumber(),
             product_data: {
                name: item.name,
                description: item.description,

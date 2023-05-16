@@ -1,6 +1,6 @@
 import Decimal from "decimal.js"
 import { Currency } from "../common"
-import { PaymentItem, paymentItemQuery } from "./PaymentItem"
+import { PaymentItem } from "./PaymentItem"
 import { StructuralMap } from "../utils/StructuralMap"
 import { StructuralSet } from "../utils/StructuralSet"
 import { stringifyObjectWithOrderedKeys } from "../utils/stringifyWithOrderedKeys"
@@ -14,11 +14,11 @@ function getTaxRates(payment: Payment): StructuralSet<Decimal> {
 }
 
 function getPriceWithoutTax(payment: Payment): Decimal {
-   return getPrice(payment, paymentItemQuery.getPriceWithoutTax)
+   return getPrice(payment, PaymentItem.getPriceWithoutTax)
 }
 
 function getPriceWithTax(payment: Payment): Decimal {
-   return getPrice(payment, paymentItemQuery.getPriceWithTax)
+   return getPrice(payment, PaymentItem.getPriceWithTax)
 }
 
 function getTaxAmountsForTaxRates(
@@ -39,7 +39,7 @@ function getTaxAmountForTaxRate(payment: Payment, taxRate: Decimal): Decimal {
          stringifyObjectWithOrderedKeys(item.taxRate) ===
          stringifyObjectWithOrderedKeys(taxRate)
       ) {
-         const itemTax = paymentItemQuery.getTax(item, quantity)
+         const itemTax = PaymentItem.getTax(item, quantity)
          tax = tax.plus(itemTax)
       }
    }
@@ -90,16 +90,14 @@ type Payment = {
    currency: Currency
 }
 
-export type { Payment }
-export const paymentQuery = {
+const Payment = {
    getTaxAmountsForTaxRates,
    getTaxAmountForTaxRate,
    getTaxRates,
    getItemsWithDefaultTaxRate,
    getPriceWithoutTax,
    getPriceWithTax,
-}
-
-export const paymentMutation = {
    addItem,
 }
+
+export { Payment }

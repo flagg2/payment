@@ -1,15 +1,16 @@
-import { Stripe as StripeSdk } from "stripe"
+import { Stripe as StripeSdkImport } from "stripe"
 import { createCheckoutSession } from "./checkoutSession"
 
+type StripeSdk = StripeSdkImport
+
 function createStripeSdk(privateKey: string): StripeSdk {
-   return new StripeSdk(privateKey, {
+   return new StripeSdkImport(privateKey, {
       apiVersion: "2022-11-15",
    })
 }
-
-export const stripeMutation = {
-   createStripeSdk,
+const StripeSdk = {
+   create: createStripeSdk,
    createCheckoutSession,
 }
 
-export type { StripeSdk }
+export { StripeSdk }

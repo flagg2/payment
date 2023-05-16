@@ -158,7 +158,6 @@
       "no-param-reassign": "off",
       "no-plusplus": "off",
       "no-proto": "error",
-      "@typescript-eslint/no-redeclare": "error",
       "no-regex-spaces": "error",
       "no-restricted-exports": "off",
       "no-restricted-globals": "off",
