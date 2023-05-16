@@ -1,5 +1,12 @@
 # @flagg2/payment
 
+## 0.1.0
+
+### Minor Changes
+
+-  update naming convention
+-  update naming convention
+
 ## 0.0.18
 
 ### Patch Changes

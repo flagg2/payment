@@ -1,10 +1,11 @@
-import { Result } from "@flagg2/result"
+import { AsyncResult, Result } from "@flagg2/result"
 import { Payee } from "../payment/Payee"
 import { Payer } from "../payment/Payer"
 import z from "zod"
 import { Payment } from "../payment/Payment"
 import { PaymentItem } from "../payment/PaymentItem"
 import Decimal from "decimal.js"
+import { briskFetch } from "../utils/briskFetch"
 
 type Invoice = {
    invoiceData: InvoiceData
@@ -127,6 +128,28 @@ function parseUnknown(invoice: unknown): Result<Invoice> {
 
 function getSchema() {
    return schema
+}
+
+async function createPdf(
+   invoice: Invoice,
+   pdfServiceConfig: {
+      apiKey: string
+      url: string
+   },
+): AsyncResult<{ base64: string }> {
+   const { apiKey, url } = pdfServiceConfig
+   const stringifiedInvoice = JSON.stringify(invoice)
+   const result = await briskFetch<string>(url, {
+      method: "POST",
+      apiKey,
+      body: stringifiedInvoice,
+   })
+
+   if (result.isErr()) {
+      return Result.err(result.error)
+   }
+
+   return Result.ok({ base64: result.value.data })
 }
 
 const Invoice = {

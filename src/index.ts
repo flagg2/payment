@@ -1,17 +1,13 @@
 import { Payee } from "./payment/Payee"
 import { Payer } from "./payment/Payer"
-import { Payment, paymentQuery, paymentMutation } from "./payment/Payment"
-import {
-   PaymentItem,
-   paymentItemQuery,
-   paymentItemMutation,
-} from "./payment/PaymentItem"
-import { Price, priceQuery, priceMutation } from "./payment/Price"
-import { Invoice, InvoiceData, invoiceQuery } from "./invoicing/Invoice"
-import { stripeMutation, StripeSdk } from "./stripe"
-import { taxRateQuery } from "./payment/TaxRate"
+import { Payment } from "./payment/Payment"
+import { PaymentItem } from "./payment/PaymentItem"
+import { Price } from "./payment/Price"
+import { Invoice, InvoiceData } from "./invoicing/Invoice"
+import { Stripe } from "./stripe"
+import { TaxRate } from "./payment/TaxRate"
 
-export type {
+export {
    Payee,
    Payer,
    Payment,
@@ -19,17 +15,6 @@ export type {
    Price,
    Invoice,
    InvoiceData,
-   StripeSdk,
-}
-
-export {
-   paymentQuery,
-   paymentMutation,
-   paymentItemQuery,
-   paymentItemMutation,
-   invoiceQuery,
-   priceQuery,
-   priceMutation,
-   stripeMutation,
-   taxRateQuery,
+   Stripe,
+   TaxRate,
 }
