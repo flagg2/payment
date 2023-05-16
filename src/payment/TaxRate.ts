@@ -1,6 +1,15 @@
 import Decimal from "decimal.js"
 
-function getDisplayName(taxRate: Decimal): string {
+function getDisplayName(
+   taxRate: Decimal,
+   opts?: {
+      includePrefix?: boolean
+   },
+): string {
+   const { includePrefix } = opts ?? {}
+   if (includePrefix) {
+      return `DPH ${taxRate.toString()}%`
+   }
    return `${taxRate.toString()}%`
 }
 

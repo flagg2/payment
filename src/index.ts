@@ -4,7 +4,7 @@ import { Payment } from "./payment/Payment"
 import { PaymentItem } from "./payment/PaymentItem"
 import { Price } from "./payment/Price"
 import { Invoice, InvoiceData } from "./invoicing/Invoice"
-import { Stripe } from "./stripe"
+import { StripeClient } from "./stripe/Client"
 import { TaxRate } from "./payment/TaxRate"
 
 export {
@@ -15,6 +15,6 @@ export {
    Price,
    Invoice,
    InvoiceData,
-   Stripe,
+   StripeClient,
    TaxRate,
 }

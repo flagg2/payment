@@ -101,8 +101,6 @@ async function hasValidVat(payer: Payer): AsyncResult<boolean> {
       ),
    )
 
-   console.log({ response })
-
    if (response.isErr()) {
       return Result.err(response.error)
    }

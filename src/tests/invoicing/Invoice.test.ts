@@ -1,14 +1,25 @@
-import { beforeEach, expect, it, describe } from "vitest"
+import { beforeEach, expect, it, describe, beforeAll } from "vitest"
 import { Invoice } from "../../invoicing/Invoice"
 import Decimal from "decimal.js"
+import dotenv from "dotenv"
+import pdfParse from "pdf-parse/lib/pdf-parse"
+import {
+   ForbiddenError,
+   UnknownError,
+   UnprocessableEntityError,
+} from "../../utils/briskFetch"
 
-let mapItemsInvoice: any
-let mapItemsInvoiceExpected: Invoice
+let unparsedMapInvoice: any
+let parsedMapInvoice: Invoice
 
 let arrayItemsInvoice: any
 
+beforeAll(() => {
+   dotenv.config({ path: ".env.test" })
+})
+
 beforeEach(() => {
-   mapItemsInvoice = {
+   unparsedMapInvoice = {
       invoiceData: {
          createdDate: new Date(),
          dueDate: new Date(),
@@ -65,10 +76,10 @@ beforeEach(() => {
       },
    }
 
-   mapItemsInvoiceExpected = {
-      ...mapItemsInvoice,
+   parsedMapInvoice = {
+      ...unparsedMapInvoice,
       payment: {
-         ...mapItemsInvoice.payment,
+         ...unparsedMapInvoice.payment,
          items: new Map([
             [
                {
@@ -83,9 +94,9 @@ beforeEach(() => {
    }
 
    arrayItemsInvoice = {
-      ...mapItemsInvoice,
+      ...unparsedMapInvoice,
       payment: {
-         ...mapItemsInvoice.payment,
+         ...unparsedMapInvoice.payment,
          items: [
             {
                item: {
@@ -102,20 +113,19 @@ beforeEach(() => {
 
 describe("Invoice with map items", () => {
    it("Should validate a correct invoice", () => {
-      const result = Invoice.parseUnknown(mapItemsInvoice)
-      console.log(result)
+      const result = Invoice.parseUnknown(unparsedMapInvoice)
       expect(result.isOk()).toBe(true)
       if (result.isErr()) return
 
       const { value } = result
-      expect(value).toStrictEqual(mapItemsInvoiceExpected)
+      expect(value).toStrictEqual(parsedMapInvoice)
    })
 
    it("Should not validate an invoice with missing required fields", () => {
       const result = Invoice.parseUnknown({
-         ...mapItemsInvoice,
+         ...unparsedMapInvoice,
          payee: {
-            ...mapItemsInvoice.payee,
+            ...unparsedMapInvoice.payee,
             companyInfo: undefined,
          },
       })
@@ -124,9 +134,9 @@ describe("Invoice with map items", () => {
 
    it("Should not validate an invoice with invalid fields", () => {
       const result = Invoice.parseUnknown({
-         ...mapItemsInvoice,
+         ...unparsedMapInvoice,
          invoiceData: {
-            ...mapItemsInvoice.invoiceData,
+            ...unparsedMapInvoice.invoiceData,
             number: 1,
          },
       })
@@ -136,9 +146,9 @@ describe("Invoice with map items", () => {
    // TODO: later
    it.skip("Should not validate an invoice with duplicate items", () => {
       const result = Invoice.parseUnknown({
-         ...mapItemsInvoice,
+         ...unparsedMapInvoice,
          payment: {
-            ...mapItemsInvoice.payment,
+            ...unparsedMapInvoice.payment,
             items: new Map([
                [
                   {
@@ -164,9 +174,9 @@ describe("Invoice with map items", () => {
 
    it("Should accept decimal class values", () => {
       const result = Invoice.parseUnknown({
-         ...mapItemsInvoice,
+         ...unparsedMapInvoice,
          payment: {
-            ...mapItemsInvoice.payment,
+            ...unparsedMapInvoice.payment,
             items: new Map([
                [
                   {
@@ -180,7 +190,7 @@ describe("Invoice with map items", () => {
          },
       })
       expect(result.isOk()).toBe(true)
-      expect(result.unwrap()).toStrictEqual(mapItemsInvoiceExpected)
+      expect(result.unwrap()).toStrictEqual(parsedMapInvoice)
    })
 })
 
@@ -191,7 +201,7 @@ describe("Invoice with array items", () => {
       if (result.isErr()) return
 
       const { value } = result
-      expect(value).toEqual(mapItemsInvoiceExpected)
+      expect(value).toEqual(parsedMapInvoice)
    })
 
    it("Should not validate an invoice with missing required fields", () => {
@@ -254,5 +264,136 @@ describe("Invoice with array items", () => {
          },
       })
       expect(result.isOk()).toBe(false)
+   })
+})
+
+describe("Create pdf", () => {
+   it(
+      "Should generate base64 pdf from valid invoice",
+      async () => {
+         const result = await Invoice.createPdf(
+            {
+               ...parsedMapInvoice,
+               payment: {
+                  ...parsedMapInvoice.payment,
+                  items: new Map([
+                     [
+                        {
+                           name: "Big Mac",
+                           priceWithoutTax: new Decimal(3.99),
+                           taxRate: new Decimal(21),
+                        },
+                        new Decimal(1),
+                     ],
+                  ]),
+               },
+            },
+            {
+               apiKey: process.env.INVOICING_SERVICE_API_KEY as string,
+               url: process.env.INVOICING_SERVICE_URL as string,
+            },
+         )
+         expect(result.isOk()).toBe(true)
+         if (result.isErr()) return
+
+         const { value } = result
+
+         const pdf = Buffer.from(value.base64, "base64")
+         expect(pdf.length).toBeGreaterThan(0)
+
+         const pdfInfo = await pdfParse(pdf)
+         expect(pdfInfo.numpages).toBe(1)
+         expect(pdfInfo.text).toContain("Big Mac")
+         expect(pdfInfo.text).toContain("Faktúra")
+         expect(pdfInfo.text).toContain("Odoberateľ".toUpperCase())
+         expect(pdfInfo.text).toContain("Dodávateľ".toUpperCase())
+         expect(pdfInfo.text).toContain("DPH")
+         expect(pdfInfo.text).not.toContain("Debilko")
+      },
+      {
+         timeout: 30000,
+      },
+   )
+
+   it("Should not generate pdf from invalid invoice", async () => {
+      const result = await Invoice.createPdf(
+         {
+            ...parsedMapInvoice,
+            payment: {
+               ...parsedMapInvoice.payment,
+               items: new Map([
+                  [
+                     {
+                        priceWithoutTax: new Decimal(3.99),
+                        taxRate: new Decimal(21),
+                     },
+                     new Decimal(1),
+                  ],
+               ]) as any,
+            },
+         },
+         {
+            apiKey: process.env.INVOICING_SERVICE_API_KEY as string,
+            url: process.env.INVOICING_SERVICE_URL as string,
+         },
+      )
+      expect(result.isOk()).toBe(false)
+      expect(result.unwrapErr()).toBeInstanceOf(UnprocessableEntityError)
+   })
+
+   it("Should not work with invalid api key", async () => {
+      const result = await Invoice.createPdf(parsedMapInvoice, {
+         apiKey: "invalid",
+         url: process.env.INVOICING_SERVICE_URL as string,
+      })
+      expect(result.isOk()).toBe(false)
+      expect(result.unwrapErr()).toBeInstanceOf(ForbiddenError)
+   })
+
+   it("Should not work with invalid url", async () => {
+      const result = await Invoice.createPdf(parsedMapInvoice, {
+         apiKey: process.env.INVOICING_SERVICE_API_KEY as string,
+         url: "invalid",
+      })
+      expect(result.isOk()).toBe(false)
+      expect(result.unwrapErr()).toBeInstanceOf(UnknownError)
+   })
+
+   it("Should be able to create multiple pdfs concurrently", async () => {
+      const result = await Promise.all([
+         Invoice.createPdf(parsedMapInvoice, {
+            apiKey: process.env.INVOICING_SERVICE_API_KEY as string,
+            url: process.env.INVOICING_SERVICE_URL as string,
+         }),
+         Invoice.createPdf(
+            {
+               ...parsedMapInvoice,
+               payee: {
+                  ...parsedMapInvoice.payee,
+                  name: "Debilko",
+               },
+            },
+            {
+               apiKey: process.env.INVOICING_SERVICE_API_KEY as string,
+               url: process.env.INVOICING_SERVICE_URL as string,
+            },
+         ),
+      ])
+      console.log({ result })
+      expect(result.every((r) => r.isOk())).toBe(true)
+
+      const pdf1 = Buffer.from(result[0].unwrap().base64, "base64")
+      const pdf2 = Buffer.from(result[1].unwrap().base64, "base64")
+      expect(pdf1.length).toBeGreaterThan(0)
+      expect(pdf2.length).toBeGreaterThan(0)
+      expect(pdf1).not.toBe(pdf2)
+
+      const pdfInfo1 = await pdfParse(pdf1)
+      const pdfInfo2 = await pdfParse(pdf2)
+
+      expect(pdfInfo1.numpages).toBe(1)
+      expect(pdfInfo2.numpages).toBe(1)
+      expect(pdfInfo1.text).toContain("McDonalds")
+      expect(pdfInfo2.text).toContain("Debilko")
    })
 })

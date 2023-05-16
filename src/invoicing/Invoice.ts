@@ -5,7 +5,7 @@ import z from "zod"
 import { Payment } from "../payment/Payment"
 import { PaymentItem } from "../payment/PaymentItem"
 import Decimal from "decimal.js"
-import { briskFetch } from "../utils/briskFetch"
+import { FetchError, briskFetch } from "../utils/briskFetch"
 
 type Invoice = {
    invoiceData: InvoiceData
@@ -99,25 +99,24 @@ const schema = z.object({
    }),
    payment: z.object({
       currency: z.enum(["CZK", "EUR", "USD"]),
-      items: z.union([mapLikeItemsSchema, arrayLikeItemsSchema]),
+      items: z
+         .union([mapLikeItemsSchema, arrayLikeItemsSchema])
+         .transform((items) => {
+            if (Array.isArray(items)) {
+               const itemMap = new Map<PaymentItem, Decimal>()
+               for (const { item, quantity } of items) {
+                  itemMap.set(item, quantity)
+               }
+               return itemMap
+            }
+            return items
+         }),
    }),
 })
 
 function parseUnknown(invoice: unknown): Result<Invoice> {
    try {
-      const parsed = schema.parse(invoice)
-
-      if (Array.isArray(parsed.payment.items)) {
-         const itemMap = new Map<PaymentItem, Decimal>()
-         for (const { item, quantity } of parsed.payment.items) {
-            itemMap.set(item, quantity)
-         }
-         parsed.payment.items = itemMap
-
-         return Result.ok(parsed as Invoice)
-      }
-
-      return Result.ok(parsed as Invoice)
+      return Result.ok(schema.parse(invoice))
    } catch (error) {
       if (error instanceof z.ZodError) {
          return Result.err(error)
@@ -130,19 +129,60 @@ function getSchema() {
    return schema
 }
 
+type ItemTransformedForFetching = {
+   item: Omit<PaymentItem, "priceWithoutTax" | "taxRate"> & {
+      priceWithoutTax: number
+      taxRate: number
+   }
+   quantity: number
+}
+
+function transformItemsBeforeFetching(
+   items: Map<PaymentItem, Decimal>,
+): ItemTransformedForFetching[] {
+   const result: ItemTransformedForFetching[] = []
+
+   for (const [item, quantity] of items) {
+      result.push({
+         item: {
+            ...item,
+            priceWithoutTax: item.priceWithoutTax.toNumber(),
+            taxRate: item.taxRate.toNumber(),
+         },
+         quantity: quantity.toNumber(),
+      })
+   }
+
+   return result
+}
+
+function toPlainObject(invoice: Invoice) {
+   const items = transformItemsBeforeFetching(invoice.payment.items)
+
+   return {
+      ...invoice,
+      payment: {
+         ...invoice.payment,
+         items,
+      },
+   }
+}
+
 async function createPdf(
    invoice: Invoice,
    pdfServiceConfig: {
       apiKey: string
       url: string
    },
-): AsyncResult<{ base64: string }> {
+): AsyncResult<{ base64: string }, FetchError> {
    const { apiKey, url } = pdfServiceConfig
-   const stringifiedInvoice = JSON.stringify(invoice)
-   const result = await briskFetch<string>(url, {
+
+   const urlWithPath = `${url}/invoice/pdf`
+
+   const result = await briskFetch<string>(urlWithPath, {
       method: "POST",
       apiKey,
-      body: stringifiedInvoice,
+      body: toPlainObject(invoice),
    })
 
    if (result.isErr()) {
@@ -155,6 +195,8 @@ async function createPdf(
 const Invoice = {
    parseUnknown,
    getSchema,
+   createPdf,
+   toPlainObject,
 }
 
 export { Invoice, InvoiceData }

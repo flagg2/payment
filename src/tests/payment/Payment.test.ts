@@ -68,10 +68,36 @@ describe("Price calculation", () => {
          )
       })
    })
+
+   describe("Item combination", () => {
+      beforeEach(() => {
+         payment1 = {
+            currency: "EUR",
+            items: new Map([]),
+         }
+
+         Payment.addItem(payment1, bigMac, new Decimal(1))
+         Payment.addItem(payment1, fries, new Decimal(1))
+      })
+
+      it("Should return correct price with tax", () => {
+         expect(payment1.items.size).toBe(2)
+         expect(Payment.getPriceWithTax(payment1)).toStrictEqual(
+            new Decimal(7.4294),
+         )
+      })
+
+      it("Should return correct price without tax", () => {
+         expect(payment1.items.size).toBe(2)
+         expect(Payment.getPriceWithoutTax(payment1)).toStrictEqual(
+            new Decimal(6.14),
+         )
+      })
+   })
 })
 
 describe("Tax map", () => {
-   it.only("Should work with one item", () => {
+   it("Should work with one item", () => {
       payment1 = {
          currency: "EUR",
          items: new Map([]),
@@ -81,8 +107,6 @@ describe("Tax map", () => {
 
       const expected = new StructuralMap<object, Price>()
       expected.set(new Decimal(21), new Decimal(0.8379))
-
-      console.log(Payment.getTaxAmountsForTaxRates(payment1).keys()[0])
 
       expect(Payment.getTaxAmountsForTaxRates(payment1)).toStrictEqual(expected)
    })

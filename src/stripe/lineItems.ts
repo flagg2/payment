@@ -1,44 +1,14 @@
-import { Stripe as StripeSdk } from "stripe"
-import { Payment } from "../payment/Payment"
 import { AsyncResult, Result } from "@flagg2/result"
-import { Price } from "../payment/Price"
+import { Payment } from "../payment/Payment"
+import { Stripe as StripeSdk } from "stripe"
 import { getTaxRateMap } from "./taxRate"
+import { Price } from "../payment/Price"
+import { StripeClient } from "./Client"
 
-type StripeCheckoutSession = StripeSdk.Checkout.Session
 type StripeLineItem = StripeSdk.Checkout.SessionCreateParams.LineItem
 
-export async function createCheckoutSession(
-   client: StripeSdk,
-   payment: Payment,
-   urls: {
-      successUrl: string
-      cancelUrl: string
-   },
-): AsyncResult<StripeCheckoutSession> {
-   const lineItems = await getLineItems(client, payment)
-   if (lineItems.isErr()) {
-      return Result.err(lineItems.error)
-   }
-
-   const { successUrl, cancelUrl } = urls
-
-   const session = await Result.from(
-      client.checkout.sessions.create({
-         payment_method_types: ["card"],
-         mode: "payment",
-         line_items: lineItems.value,
-         success_url: successUrl,
-         cancel_url: cancelUrl,
-      }),
-   )
-   if (session.isErr()) {
-      return Result.err(session.error)
-   }
-   return Result.ok(session.value)
-}
-
-async function getLineItems(
-   client: StripeSdk,
+export async function getLineItems(
+   client: StripeClient,
    payment: Payment,
 ): AsyncResult<StripeLineItem[]> {
    const taxRateMap = await getTaxRateMap(client, payment)

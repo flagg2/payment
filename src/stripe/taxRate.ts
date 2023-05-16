@@ -16,7 +16,9 @@ async function createMissingTaxRates(
       Promise.all(
          toCreate.map((rate) =>
             client.taxRates.create({
-               display_name: TaxRate.getDisplayName(rate),
+               display_name: TaxRate.getDisplayName(rate, {
+                  includePrefix: true,
+               }),
                inclusive: false,
                percentage: rate.toNumber(),
             }),
@@ -50,7 +52,10 @@ export async function getTaxRateMap(
       const existingTaxRate = existingTaxRates.find(
          (rate) =>
             rate.percentage === paymentTaxRate.toNumber() &&
-            rate.display_name === TaxRate.getDisplayName(paymentTaxRate),
+            rate.display_name ===
+               TaxRate.getDisplayName(paymentTaxRate, {
+                  includePrefix: true,
+               }),
       )
 
       if (existingTaxRate) {
@@ -69,7 +74,9 @@ export async function getTaxRateMap(
       const paymentTaxRate = toBeCreated.find(
          (rate) =>
             rate.toNumber() === createdTaxRate.percentage &&
-            TaxRate.getDisplayName(rate) === createdTaxRate.display_name,
+            TaxRate.getDisplayName(rate, {
+               includePrefix: true,
+            }) === createdTaxRate.display_name,
       )
       if (paymentTaxRate) {
          taxRateMap.set(paymentTaxRate, createdTaxRate)

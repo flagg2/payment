@@ -1,5 +1,17 @@
 # @flagg2/payment
 
+## 0.1.2
+
+### Patch Changes
+
+-  always transform items to a map through schema and parseunknown
+
+## 0.1.1
+
+### Patch Changes
+
+-  add toplainobject
+
 ## 0.1.0
 
 ### Minor Changes

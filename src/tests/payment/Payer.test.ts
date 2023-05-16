@@ -30,7 +30,6 @@ describe("Check VAT", () => {
    it("Should pass with foreign VAT", async () => {
       const VAT = "FR63382357721" // psg vat
       const isValid = await Payer.hasValidVat(payerWithVat(VAT))
-      console.log(isValid)
       expect(isValid.isErr()).toBe(false)
       if (isValid.isOk()) {
          expect(isValid.value).toBe(true)
