@@ -114,6 +114,13 @@ const schema = z.object({
    }),
 })
 
+/**
+ * Parses an unknown invoice using a schema and returns a `Result` object.
+ *
+ * @param invoice - The unknown invoice to parse.
+ * @returns - A `Result` object containing either the parsed invoice or an error.
+ */
+
 function parseUnknown(invoice: unknown): Result<Invoice> {
    try {
       return Result.ok(schema.parse(invoice))
@@ -124,6 +131,14 @@ function parseUnknown(invoice: unknown): Result<Invoice> {
       return Result.err(new Error("Unknown error"))
    }
 }
+
+/**
+ * Returns a schema for the invoice. This schema allows for numbers to be passed instead of `Decimal` objects and
+ * converts them to `Decimal` objects. It also allows for an array of items to be passed instead of a map and converts
+ * it to a map.
+ *
+ * @returns - A schema for the invoice.
+ */
 
 function getSchema() {
    return schema
@@ -156,6 +171,13 @@ function transformItemsBeforeFetching(
    return result
 }
 
+/**
+ * Transforms the invoice into a plain object, which does not use `Decimal` objects or maps.
+ *
+ * @param invoice - The invoice to transform.
+ * @returns - The transformed invoice.
+ */
+
 function toPlainObject(invoice: Invoice) {
    const items = transformItemsBeforeFetching(invoice.payment.items)
 
@@ -167,6 +189,14 @@ function toPlainObject(invoice: Invoice) {
       },
    }
 }
+
+/**
+ * Creates a PDF of the invoice using the PDF service. Note that this might take up to 20 seconds.
+ *
+ * @param invoice The invoice to create a PDF of.
+ * @param pdfServiceConfig The configuration of the PDF service.
+ * @returns  A `Result` object containing either the base64 encoded PDF or an error.
+ */
 
 async function createPdf(
    invoice: Invoice,

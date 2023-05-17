@@ -82,6 +82,13 @@ type VatNumberValidationResult = {
 }
 
 // TODO: add autocomplete
+/**
+ * Check the validity of the VAT number of the payer against the european VIES database.
+ *
+ * @param payer The payer to check the VAT number for.
+ * @returns  A `Result` object containing either the validity of the VAT number
+ * in case it was in the correct format or an error.
+ */
 
 async function hasValidVat(payer: Payer): AsyncResult<boolean> {
    if (payer.companyInfo?.vatId === undefined) {

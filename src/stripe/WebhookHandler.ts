@@ -41,6 +41,9 @@ type WebhookHandlerParams = {
    webhookSecret: string
 }
 
+/**
+ * A class which can handle stripe webhooks
+ */
 class StripeWebhookHandler {
    private readonly client: StripeClient
    private readonly expressApp: Application
@@ -88,6 +91,13 @@ class StripeWebhookHandler {
       )
    }
 
+   /**
+    * Register a handler for a specific event. You can register multiple handlers for the same event.
+    *
+    * @param event The event to register the handler for
+    * @param handler The handler to register
+    */
+
    public on<T extends keyof StripeEventType>(
       event: T,
       handler: StripeEventType[T],
@@ -97,6 +107,17 @@ class StripeWebhookHandler {
       this.handlers[event] = handlers
    }
 }
+
+/**
+ * Create a new stripe webhook handler, which can listen for webhook events from stripe.
+ *
+ * @param params The parameters to create the handler with
+ * @param params.client The stripe api client
+ * @param params.expressApp The express application which is going to handle the webhook
+ * @param params.apiEndpoint The endpoint to listen for webhooks on
+ * @param params.webhookSecret The secret to use to verify the webhook
+ * @returns The webhook handler
+ */
 
 function createStripeWebhookHandler(
    params: WebhookHandlerParams,
