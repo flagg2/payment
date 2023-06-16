@@ -379,7 +379,6 @@ describe("Create pdf", () => {
             },
          ),
       ])
-      console.log({ result })
       expect(result.every((r) => r.isOk())).toBe(true)
 
       const pdf1 = Buffer.from(result[0].unwrap().base64, "base64")

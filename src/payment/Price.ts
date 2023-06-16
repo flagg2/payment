@@ -75,9 +75,9 @@ function toCents(price: Decimal): Decimal {
 
 function getFormatted(price: Decimal, currency: Currency): string {
    const split = asWholeAndCents(price)
-   return `${split.whole.toString()}.${split.cents.toString()} ${getCurrencyString(
-      currency,
-   )}`
+   return `${split.whole.toString()}.${split.cents
+      .toString()
+      .padEnd(2, "0")} ${getCurrencyString(currency)}`
 }
 
 type Price = Decimal

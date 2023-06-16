@@ -110,6 +110,7 @@ class StripeWebhookHandler {
 
 /**
  * Create a new stripe webhook handler, which can listen for webhook events from stripe.
+ * The handler is not yet tested and might not work.
  *
  * @param params The parameters to create the handler with
  * @param params.client The stripe api client

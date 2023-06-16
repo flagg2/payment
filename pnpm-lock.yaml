@@ -1,6 +1,13 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
+  '@flagg2/data-structures':
+    specifier: ^0.0.4
+    version: 0.0.4
   '@flagg2/result':
     specifier: ^1.2.1
     version: 1.2.1
@@ -510,6 +517,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@flagg2/data-structures@0.0.4:
+    resolution: {integrity: sha512-Y/Wpih5AxBqSucsXcqwEkgWQCCNq+oneO0j8uFU0KcJaM4m1L52R0AeMkuzpQq6Gg8YAoH31xBF4H8oB8wg2Xg==}
+    dependencies:
+      decimal.js: 10.4.3
+    dev: false
 
   /@flagg2/result@1.2.1:
     resolution: {integrity: sha512-wkVYyTJVzd4rhQb/0SYGJ65cH861M5PD8SxOB6iWxKeaU90KYG5AjsYoR4RDYZKhZ3rEuNkaKWOhL57MUorFHQ==}

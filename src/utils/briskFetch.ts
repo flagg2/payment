@@ -54,8 +54,6 @@ export async function briskFetch<T>(
          ...(body !== undefined && { data: body }),
       }
 
-      console.log(config)
-
       const { data } = await axios<BriskResponse<T>>(url, config)
 
       return Result.ok(data)

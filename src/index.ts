@@ -4,8 +4,10 @@ import { Payment } from "./payment/Payment"
 import { PaymentItem } from "./payment/PaymentItem"
 import { Price } from "./payment/Price"
 import { Invoice, InvoiceData } from "./invoicing/Invoice"
-import { StripeClient } from "./stripe/Client"
 import { TaxRate } from "./payment/TaxRate"
+
+import { StripeClient } from "./stripe/Client"
+import { StripeWebhook } from "./stripe/WebhookHandler"
 
 export {
    Payee,
@@ -17,4 +19,5 @@ export {
    InvoiceData,
    StripeClient,
    TaxRate,
+   StripeWebhook,
 }

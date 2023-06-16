@@ -1,5 +1,11 @@
 # @flagg2/payment
 
+## 0.1.3
+
+### Patch Changes
+
+-  add docs
+
 ## 0.1.2
 
 ### Patch Changes

@@ -1,9 +1,11 @@
 import Decimal from "decimal.js"
 import { Currency } from "../common"
 import { PaymentItem } from "./PaymentItem"
-import { StructuralMap } from "../utils/StructuralMap"
-import { StructuralSet } from "../utils/StructuralSet"
-import { stringifyObjectWithOrderedKeys } from "../utils/stringifyWithOrderedKeys"
+import {
+   StructuralMap,
+   StructuralSet,
+   stringifyObjectWithOrderedKeys,
+} from "@flagg2/data-structures"
 
 /**
  * Get all different tax rates used in the payment

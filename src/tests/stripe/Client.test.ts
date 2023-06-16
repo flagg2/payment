@@ -66,7 +66,6 @@ describe("Stripe checkout session", () => {
    it("Should create a checkout session", async () => {
       const session = await StripeCheckoutSession.create(client, payment1, urls)
 
-      console.log(session)
       expect(session.isOk()).toBe(true)
       const value = session.unwrap()
 
@@ -82,8 +81,6 @@ describe("Stripe checkout session", () => {
 
       expect(value.amount_total).toBe(743)
       expect(value.amount_subtotal).toBe(614)
-
-      console.log(value.url)
    })
 
    it("Should create a session, then expire it", async () => {
