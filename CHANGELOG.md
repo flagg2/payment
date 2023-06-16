@@ -1,5 +1,11 @@
 # @flagg2/payment
 
+## 0.1.4
+
+### Patch Changes
+
+-  extract data structures to lib
+
 ## 0.1.3
 
 ### Patch Changes
