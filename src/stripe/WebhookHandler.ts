@@ -22,8 +22,12 @@ const knownEventTypes = [
 ] as const
 
 type StripeEventType = {
-   "checkout.session.completed": (event: CheckoutSessionEvent) => void
-   "checkout.session.expired": (event: CheckoutSessionEvent) => void
+   "checkout.session.completed": (
+      event: CheckoutSessionEvent,
+   ) => void | Promise<void>
+   "checkout.session.expired": (
+      event: CheckoutSessionEvent,
+   ) => void | Promise<void>
 }
 
 function isKnownEventType(type: string): type is keyof StripeEventType {
@@ -83,8 +87,12 @@ class StripeWebhookHandler {
                return
             }
             for (const handler of handlers) {
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-               handler(event as any)
+               const result = handler(event as CheckoutSessionEvent)
+               if (result instanceof Promise) {
+                  result.catch((err) => {
+                     console.error(err)
+                  })
+               }
             }
             res.sendStatus(200)
          },
@@ -101,7 +109,7 @@ class StripeWebhookHandler {
    public on<T extends keyof StripeEventType>(
       event: T,
       handler: StripeEventType[T],
-   ): void | Promise<void> {
+   ): void {
       const handlers: StripeEventType[T][] = this.handlers[event] ?? []
       handlers.push(handler)
       this.handlers[event] = handlers

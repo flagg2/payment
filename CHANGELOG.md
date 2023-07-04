@@ -1,5 +1,17 @@
 # @flagg2/payment
 
+## 0.1.7
+
+### Patch Changes
+
+-  fix webhook handler
+
+## 0.1.6
+
+### Patch Changes
+
+-  allow promise in webhookhandler
+
 ## 0.1.5
 
 ### Patch Changes
