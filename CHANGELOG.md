@@ -1,5 +1,13 @@
 # @flagg2/payment
 
+## 0.1.5
+
+### Patch Changes
+
+-  add checkout session, remove redundant libs
+-  remove redundant deps
+-  export checkoutsession
+
 ## 0.1.4
 
 ### Patch Changes
