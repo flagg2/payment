@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import { Payment } from "../../payment/Payment"
 import { PaymentItem } from "../../payment/PaymentItem"
-import { StructuralMap } from "../../utils/StructuralMap"
 import { Price } from "../../payment/Price"
 import Decimal from "decimal.js"
+import { StructuralMap } from "@flagg2/data-structures"
 
 let payment1: Payment
 const bigMac: PaymentItem = {

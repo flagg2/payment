@@ -3,8 +3,8 @@ import { Payment } from "../payment/Payment"
 import { AsyncResult, Result } from "@flagg2/result"
 import Decimal from "decimal.js"
 import { TaxRate } from "../payment/TaxRate"
-import { StructuralMap } from "../utils/StructuralMap"
 import { takeWhileHasMore } from "./utils"
+import { StructuralMap } from "@flagg2/data-structures"
 
 type StripeTaxRate = StripeSdk.TaxRate
 
