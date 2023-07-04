@@ -8,6 +8,7 @@ import { TaxRate } from "./payment/TaxRate"
 
 import { StripeClient } from "./stripe/Client"
 import { StripeWebhook } from "./stripe/WebhookHandler"
+import { StripeCheckoutSession } from "./stripe/CheckoutSession"
 
 export {
    Payee,
@@ -20,4 +21,5 @@ export {
    StripeClient,
    TaxRate,
    StripeWebhook,
+   StripeCheckoutSession
 }
