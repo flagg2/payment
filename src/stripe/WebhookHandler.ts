@@ -101,7 +101,7 @@ class StripeWebhookHandler {
    public on<T extends keyof StripeEventType>(
       event: T,
       handler: StripeEventType[T],
-   ): void {
+   ): void | Promise<void> {
       const handlers: StripeEventType[T][] = this.handlers[event] ?? []
       handlers.push(handler)
       this.handlers[event] = handlers
