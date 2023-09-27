@@ -1,11 +1,11 @@
-import { AsyncResult, Result } from "@flagg2/result"
+import { Result } from "@flagg2/result"
 import { Payee } from "../payment/Payee"
 import { Payer } from "../payment/Payer"
 import z from "zod"
 import { Payment } from "../payment/Payment"
 import { PaymentItem } from "../payment/PaymentItem"
 import Decimal from "decimal.js"
-import { FetchError, briskFetch } from "../utils/briskFetch"
+import { briskFetch } from "../utils/briskFetch"
 
 type Invoice = {
    invoiceData: InvoiceData
@@ -121,15 +121,8 @@ const schema = z.object({
  * @returns - A `Result` object containing either the parsed invoice or an error.
  */
 
-function parseUnknown(invoice: unknown): Result<Invoice> {
-   try {
-      return Result.ok(schema.parse(invoice))
-   } catch (error) {
-      if (error instanceof z.ZodError) {
-         return Result.err(error)
-      }
-      return Result.err(new Error("Unknown error"))
-   }
+function parseUnknown(invoice: unknown) {
+   return Result.from(() => schema.parse(invoice))
 }
 
 /**
@@ -204,7 +197,7 @@ async function createPdf(
       apiKey: string
       url: string
    },
-): AsyncResult<{ base64: string }, FetchError> {
+) {
    const { apiKey, url } = pdfServiceConfig
 
    const urlWithPath = `${url}/invoice/pdf`
@@ -215,11 +208,7 @@ async function createPdf(
       body: toPlainObject(invoice),
    })
 
-   if (result.isErr()) {
-      return Result.err(result.error)
-   }
-
-   return Result.ok({ base64: result.value.data })
+   return result.map((res) => ({ base64: res.data }))
 }
 
 const Invoice = {

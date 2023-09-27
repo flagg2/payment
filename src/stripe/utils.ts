@@ -6,14 +6,14 @@ export async function takeWhileHasMore<T extends object>(
       next_page?: string
       has_more: boolean
    }>,
-): AsyncResult<T[]> {
+) {
    const result: T[] = []
    let hasNext = true
    let lastResult = apiFn()
    while (hasNext) {
       const res = await Result.from(lastResult)
       if (res.isErr()) {
-         return Result.err(res.error)
+         return Result.err("STRIPE_API_ERROR")
       }
       const { data, has_more, next_page } = res.value
       result.push(...data)

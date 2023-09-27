@@ -8,11 +8,8 @@ import { StructuralMap } from "@flagg2/data-structures"
 
 type StripeTaxRate = StripeSdk.TaxRate
 
-async function createMissingTaxRates(
-   client: StripeSdk,
-   toCreate: Decimal[],
-): AsyncResult<StripeTaxRate[]> {
-   const createdTaxRates = await Result.from(
+async function createMissingTaxRates(client: StripeSdk, toCreate: Decimal[]) {
+   return Result.from(
       Promise.all(
          toCreate.map((rate) =>
             client.taxRates.create({
@@ -24,24 +21,18 @@ async function createMissingTaxRates(
             }),
          ),
       ),
+      "TAX_RATE_CREATION_FAILED",
    )
-   if (createdTaxRates.isErr()) {
-      return Result.err(createdTaxRates.error)
-   }
-   return Result.ok(createdTaxRates.value)
 }
 
-export async function getTaxRateMap(
-   client: StripeSdk,
-   payment: Payment,
-): AsyncResult<StructuralMap<Decimal, StripeTaxRate>> {
+export async function getTaxRateMap(client: StripeSdk, payment: Payment) {
    // TODO: make readonly
    const taxRateMap = new StructuralMap<Decimal, StripeTaxRate>()
    const allRates = await takeWhileHasMore(() =>
       client.taxRates.list({ limit: 100 }),
    )
    if (allRates.isErr()) {
-      return Result.err(allRates.error)
+      return allRates.mapErr(() => "TAX_RATE_FETCH_FAILED" as const)
    }
    const existingTaxRates = allRates.value.filter((rate) => rate.active)
 
@@ -67,7 +58,7 @@ export async function getTaxRateMap(
 
    const createdTaxRates = await createMissingTaxRates(client, toBeCreated)
    if (createdTaxRates.isErr()) {
-      return Result.err(createdTaxRates.error)
+      return createdTaxRates
    }
 
    for (const createdTaxRate of createdTaxRates.value) {
@@ -81,7 +72,7 @@ export async function getTaxRateMap(
       if (paymentTaxRate) {
          taxRateMap.set(paymentTaxRate, createdTaxRate)
       } else {
-         return Result.err(new Error("Created tax rate not found"))
+         return Result.err("TAX_RATE_NOT_FOUND")
       }
    }
 

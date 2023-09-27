@@ -116,7 +116,6 @@ describe("Invoice with map items", () => {
       const result = Invoice.parseUnknown(unparsedMapInvoice)
       expect(result.isOk()).toBe(true)
       if (result.isErr()) return
-
       const { value } = result
       expect(value).toStrictEqual(parsedMapInvoice)
    })

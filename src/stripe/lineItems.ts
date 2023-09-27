@@ -7,20 +7,17 @@ import { StripeClient } from "./Client"
 
 type StripeLineItem = StripeSdk.Checkout.SessionCreateParams.LineItem
 
-export async function getLineItems(
-   client: StripeClient,
-   payment: Payment,
-): AsyncResult<StripeLineItem[]> {
+export async function getLineItems(client: StripeClient, payment: Payment) {
    const taxRateMap = await getTaxRateMap(client, payment)
    if (taxRateMap.isErr()) {
-      return Result.err(taxRateMap.error)
+      return taxRateMap
    }
    const { items } = payment
    const lineItems: StripeLineItem[] = []
    for (const [item, quantity] of items.entries()) {
       const taxRate = taxRateMap.value.get(item.taxRate)
       if (taxRate === undefined) {
-         return Result.err(new Error("Tax rate not found"))
+         return Result.err("TAX_RATE_NOT_FOUND")
       }
       lineItems.push({
          quantity: quantity.toNumber(),

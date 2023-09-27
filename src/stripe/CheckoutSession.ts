@@ -54,15 +54,8 @@ export async function create(
  * @returns A `Result` object containing either the checkout session or an error
  */
 
-export async function findById(
-   client: StripeSdk,
-   id: string,
-): AsyncResult<StripeCheckoutSession> {
-   const session = await Result.from(client.checkout.sessions.retrieve(id))
-   if (session.isErr()) {
-      return Result.err(session.error)
-   }
-   return Result.ok(session.value)
+export async function findById(client: StripeSdk, id: string) {
+   return Result.from(client.checkout.sessions.retrieve(id))
 }
 
 /**
@@ -74,15 +67,8 @@ export async function findById(
  * @returns A `Result` object containing either the checkout session or an error
  */
 
-export async function expire(
-   client: StripeSdk,
-   id: string,
-): AsyncResult<StripeCheckoutSession> {
-   const session = await Result.from(client.checkout.sessions.expire(id))
-   if (session.isErr()) {
-      return Result.err(session.error)
-   }
-   return Result.ok(session.value)
+export async function expire(client: StripeSdk, id: string) {
+   return Result.from(client.checkout.sessions.expire(id))
 }
 
 const StripeCheckoutSession = {

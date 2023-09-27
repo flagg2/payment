@@ -1,5 +1,5 @@
 import { Address } from "../common"
-import { AsyncResult, Result } from "@flagg2/result"
+import { Result } from "@flagg2/result"
 import axios from "axios"
 
 type Payer = {
@@ -90,7 +90,7 @@ type VatNumberValidationResult = {
  * in case it was in the correct format or an error.
  */
 
-async function hasValidVat(payer: Payer): AsyncResult<boolean> {
+async function hasValidVat(payer: Payer) {
    if (payer.companyInfo?.vatId === undefined) {
       return Result.ok(false)
    }
@@ -108,13 +108,7 @@ async function hasValidVat(payer: Payer): AsyncResult<boolean> {
       ),
    )
 
-   if (response.isErr()) {
-      return Result.err(response.error)
-   }
-
-   const { isValid } = response.value.data
-
-   return Result.ok(isValid)
+   return response.map((res) => res.data.isValid)
 }
 
 const Payer = {
