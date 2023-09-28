@@ -106,6 +106,7 @@ async function hasValidVat(payer: Payer) {
       axios.get<VatNumberValidationResult>(
          `${API_URL}/${String(prefix.value)}/vat/${number.value}`,
       ),
+      "INVALID_VAT_ERROR",
    )
 
    return response.map((res) => res.data.isValid)

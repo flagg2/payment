@@ -22,15 +22,15 @@ export async function create(
       success: string
       cancel: string
    },
-): AsyncResult<StripeCheckoutSession> {
+) {
    const lineItems = await getLineItems(client, payment)
    if (lineItems.isErr()) {
-      return Result.err(lineItems.error)
+      return lineItems
    }
 
    const { success, cancel } = urls
 
-   const session = await Result.from(
+   return Result.from(
       client.checkout.sessions.create({
          payment_method_types: ["card"],
          mode: "payment",
@@ -38,11 +38,8 @@ export async function create(
          success_url: success,
          cancel_url: cancel,
       }),
+      "CHECKOUT_SESSION_CREATION_FAILED",
    )
-   if (session.isErr()) {
-      return Result.err(session.error)
-   }
-   return Result.ok(session.value)
 }
 
 /**
@@ -55,7 +52,10 @@ export async function create(
  */
 
 export async function findById(client: StripeSdk, id: string) {
-   return Result.from(client.checkout.sessions.retrieve(id))
+   return Result.from(
+      client.checkout.sessions.retrieve(id),
+      "CHECKOUT_SESSION_FETCH_FAILED",
+   )
 }
 
 /**
@@ -68,7 +68,10 @@ export async function findById(client: StripeSdk, id: string) {
  */
 
 export async function expire(client: StripeSdk, id: string) {
-   return Result.from(client.checkout.sessions.expire(id))
+   return Result.from(
+      client.checkout.sessions.expire(id),
+      "CHECKOUT_SESSION_EXPIRE_FAILED",
+   )
 }
 
 const StripeCheckoutSession = {

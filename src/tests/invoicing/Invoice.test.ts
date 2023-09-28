@@ -3,11 +3,6 @@ import { Invoice } from "../../invoicing/Invoice"
 import Decimal from "decimal.js"
 import dotenv from "dotenv"
 import pdfParse from "pdf-parse/lib/pdf-parse"
-import {
-   ForbiddenError,
-   UnknownError,
-   UnprocessableEntityError,
-} from "../../utils/briskFetch"
 
 let unparsedMapInvoice: any
 let parsedMapInvoice: Invoice
@@ -337,7 +332,7 @@ describe("Create pdf", () => {
          },
       )
       expect(result.isOk()).toBe(false)
-      expect(result.unwrapErr()).toBeInstanceOf(UnprocessableEntityError)
+      expect(result.unwrapErr()).toBe("UNPROCESSABLE_ENTITY")
    })
 
    it("Should not work with invalid api key", async () => {
@@ -346,7 +341,7 @@ describe("Create pdf", () => {
          url: process.env.INVOICING_SERVICE_URL as string,
       })
       expect(result.isOk()).toBe(false)
-      expect(result.unwrapErr()).toBeInstanceOf(ForbiddenError)
+      expect(result.unwrapErr()).toBe("FORBIDDEN")
    })
 
    it("Should not work with invalid url", async () => {
@@ -355,7 +350,7 @@ describe("Create pdf", () => {
          url: "invalid",
       })
       expect(result.isOk()).toBe(false)
-      expect(result.unwrapErr()).toBeInstanceOf(UnknownError)
+      expect(result.unwrapErr()).toBe("UNKNOWN")
    })
 
    it("Should be able to create multiple pdfs concurrently", async () => {
