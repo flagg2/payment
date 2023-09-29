@@ -51,24 +51,24 @@ function castIncludes<T extends readonly string[]>(arr: T, val: string) {
    return arr.includes(val as any)
 }
 
-function extractPrefix(vat: string): Result<keyof typeof KNOWN_PREFIXES> {
+function extractPrefix(vat: string) {
    return Result.from(() => {
       const prefix = vat.slice(0, 2)
       if (!castIncludes(KNOWN_PREFIXES, prefix)) {
          throw new Error(`Unknown prefix ${prefix}`)
       }
       return prefix as keyof typeof KNOWN_PREFIXES
-   })
+   }, "UNKNOWN_PREFIX_ERROR")
 }
 
-function extractNumber(vat: string): Result<string> {
+function extractNumber(vat: string) {
    return Result.from(() => {
       const number = vat.slice(2)
       if (!number) {
          throw new Error(`No number found in ${vat}`)
       }
       return number
-   })
+   }, "INVALID_VAT_ERROR")
 }
 
 type VatNumberValidationResult = {

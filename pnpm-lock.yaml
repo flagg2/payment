@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.0.4
     version: 0.0.4
   '@flagg2/result':
-    specifier: ^1.5.4
-    version: 1.5.4
+    specifier: ^1.6.0
+    version: 1.6.0
   '@flagg2/ts-util':
     specifier: ^1.0.3
     version: 1.0.3
@@ -521,8 +521,8 @@ packages:
       decimal.js: 10.4.3
     dev: false
 
-  /@flagg2/result@1.5.4:
-    resolution: {integrity: sha512-i0wAURpIDOa96qNoIrwhwkmzXMDEncw7SzYQsOJ/SOJ1u4KTnYAhwsKGmeC5Tx3YnmcVfbINNYSn9WKVMqRZpA==}
+  /@flagg2/result@1.6.0:
+    resolution: {integrity: sha512-KOAJrljoEpcVmYCRi3K6NCKLBs4XBn1jglahq+YPsKemz48JFEcdfUv/XIZKa/2z9ZzVj9CAdeYhUZEki0DfYg==}
     dev: false
 
   /@flagg2/ts-util@1.0.3:

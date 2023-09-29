@@ -1,6 +1,6 @@
 {
    "name": "@flagg2/payment",
-   "version": "0.1.8",
+   "version": "0.1.9",
    "description": "",
    "main": "dist/index.js",
    "module": "dist/index.mjs",
@@ -16,7 +16,7 @@
    "license": "ISC",
    "dependencies": {
       "@flagg2/data-structures": "^0.0.4",
-      "@flagg2/result": "^1.5.4",
+      "@flagg2/result": "^1.6.0",
       "@flagg2/ts-util": "^1.0.3",
       "axios": "^1.4.0",
       "clone": "^2.1.2",
