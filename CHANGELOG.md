@@ -1,5 +1,11 @@
 # @flagg2/payment
 
+## 0.1.10
+
+### Patch Changes
+
+-  new tsup
+
 ## 0.1.9
 
 ### Patch Changes

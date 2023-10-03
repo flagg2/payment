@@ -2,6 +2,8 @@ import { StripeClient } from "./Client"
 import express, { Application } from "express"
 import { Stripe } from "stripe"
 import { Buffer } from "buffer"
+import { AsyncResult, Result } from "@flagg2/result"
+import asyncHandler from "express-async-handler"
 
 type StripeWebhook = {
    client: StripeClient
@@ -21,13 +23,23 @@ const knownEventTypes = [
    "checkout.session.expired",
 ] as const
 
+type StripeEventError = {
+   status: number
+   message: string
+   data?: any
+}
+
+type StripeEventResult = Result<any, StripeEventError>
+
+type StripeEventResultPromise = Promise<StripeEventResult>
+
 type StripeEventType = {
    "checkout.session.completed": (
       event: CheckoutSessionEvent,
-   ) => void | Promise<void>
+   ) => StripeEventResultPromise
    "checkout.session.expired": (
       event: CheckoutSessionEvent,
-   ) => void | Promise<void>
+   ) => StripeEventResultPromise
 }
 
 function isKnownEventType(type: string): type is keyof StripeEventType {
@@ -60,7 +72,7 @@ class StripeWebhookHandler {
       this.expressApp.post(
          apiEndpoint,
          express.raw({ type: "application/json" }),
-         (req, res) => {
+         asyncHandler(async (req, res) => {
             const sig = req.headers["stripe-signature"]
             if (
                sig === undefined ||
@@ -76,26 +88,48 @@ class StripeWebhookHandler {
                webhookSecret,
             )
 
-            if (!isKnownEventType(event.type)) {
-               res.sendStatus(200)
+            if (
+               !isKnownEventType(event.type) ||
+               this.handlers[event.type] === undefined
+            ) {
+               res.status(200).send({
+                  message: "No handler for this event",
+               })
                return
             }
 
-            const handlers = this.handlers[event.type]
-            if (!handlers) {
-               res.sendStatus(400)
-               return
-            }
+            const handlers = this.handlers[event.type]!
+            const resultsP: StripeEventResultPromise[] = []
+
             for (const handler of handlers) {
-               const result = handler(event as CheckoutSessionEvent)
-               if (result instanceof Promise) {
-                  result.catch((err) => {
-                     console.error(err)
-                  })
+               resultsP.push(handler(event as CheckoutSessionEvent))
+            }
+
+            const results = await Promise.all(resultsP)
+            const errors: StripeEventError[] = []
+
+            for (const result of results) {
+               if (result.isErr()) {
+                  errors.push(result.errValue)
                }
             }
-            res.sendStatus(200)
-         },
+
+            if (errors.length > 0) {
+               let { status } = errors[0]!
+               if (errors.some((error) => error.status !== status)) {
+                  status = 500
+               }
+
+               res.status(status).send({
+                  errors,
+               })
+               return
+            }
+
+            res.status(200).send({
+               results: results.map((result) => result.unwrap() as unknown),
+            })
+         }),
       )
    }
 

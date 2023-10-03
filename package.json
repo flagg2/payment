@@ -1,6 +1,6 @@
 {
    "name": "@flagg2/payment",
-   "version": "0.1.9",
+   "version": "0.1.10",
    "description": "",
    "main": "dist/index.js",
    "module": "dist/index.mjs",
@@ -23,6 +23,7 @@
       "dayjs": "^1.11.7",
       "decimal.js": "^10.4.3",
       "express": "^4.18.2",
+      "express-async-handler": "^1.2.0",
       "stripe": "^12.4.0",
       "zod": "^3.21.4"
    },
@@ -40,7 +41,7 @@
       "eslint-plugin-n": "^15.6.1",
       "eslint-plugin-promise": "^6.1.1",
       "pdf-parse": "^1.1.1",
-      "tsup": "^6.7.0",
+      "tsup": "^7.2.0",
       "typescript": "^5.0.4",
       "vitest": "^0.29.2"
    },
