@@ -43,7 +43,8 @@ type StripeEventType = {
 }
 
 function isKnownEventType(type: string): type is keyof StripeEventType {
-   return type in knownEventTypes
+   // @ts-expect-error dumb ts
+   return knownEventTypes.includes(type)
 }
 
 type StripeEventMap = {
@@ -97,6 +98,8 @@ class StripeWebhookHandler {
                })
                return
             }
+
+            console.log("Received event", event)
 
             const handlers = this.handlers[event.type]!
             const resultsP: StripeEventResultPromise[] = []

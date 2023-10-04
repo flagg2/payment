@@ -1,6 +1,6 @@
 {
    "name": "@flagg2/payment",
-   "version": "0.1.16",
+   "version": "0.1.17",
    "description": "",
    "main": "dist/index.js",
    "module": "dist/index.mjs",
