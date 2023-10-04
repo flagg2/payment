@@ -22,6 +22,7 @@ export async function create(
       success: string
       cancel: string
    },
+   locale?: StripeSdk.Checkout.SessionCreateParams.Locale,
 ) {
    const lineItems = await getLineItems(client, payment)
    if (lineItems.isErr()) {
@@ -37,6 +38,7 @@ export async function create(
          line_items: lineItems.value,
          success_url: success,
          cancel_url: cancel,
+         locale,
       }),
       "CHECKOUT_SESSION_CREATION_FAILED",
    )

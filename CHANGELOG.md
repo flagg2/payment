@@ -1,5 +1,17 @@
 # @flagg2/payment
 
+## 0.1.16
+
+### Patch Changes
+
+-  fix stripe payment amount
+
+## 0.1.14
+
+### Patch Changes
+
+-  locale
+
 ## 0.1.13
 
 ### Patch Changes

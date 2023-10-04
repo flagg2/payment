@@ -24,7 +24,7 @@ export async function getLineItems(client: StripeClient, payment: Payment) {
          tax_rates: [taxRate.id],
          price_data: {
             currency: payment.currency,
-            unit_amount: Price.toCents(item.priceWithoutTax).toNumber(),
+            unit_amount: item.priceWithoutTax.toNumber(),
             product_data: {
                name: item.name,
                description: item.description,
