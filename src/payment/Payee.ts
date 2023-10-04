@@ -10,5 +10,12 @@ type Payee = {
    }
 }
 
+function create(payee: Payee): Payee {
+   return payee
+}
+
+const Payee = {
+   create,
+}
 
 export type { Payee }

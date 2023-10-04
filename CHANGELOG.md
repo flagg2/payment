@@ -1,5 +1,23 @@
 # @flagg2/payment
 
+## 0.1.13
+
+### Patch Changes
+
+-  add creation fns
+
+## 0.1.12
+
+### Patch Changes
+
+-  add method to price
+
+## 0.1.11
+
+### Patch Changes
+
+-  fix webhook responses
+
 ## 0.1.10
 
 ### Patch Changes

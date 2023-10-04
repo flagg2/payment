@@ -23,9 +23,14 @@ function getDisplayName(
    return `${taxRate.toString()}%`
 }
 
+function create(taxRate: Decimal): TaxRate {
+   return taxRate
+}
+
 type TaxRate = Decimal
 const TaxRate = {
    getDisplayName,
+   create,
 }
 
 export { TaxRate }

@@ -80,6 +80,22 @@ function getFormatted(price: Decimal, currency: Currency): string {
       .padEnd(2, "0")} ${getCurrencyString(currency)}`
 }
 
+/**
+ * Create a decimal from whole and cents
+ *
+ * @param whole The whole part of the price
+ * @param cents The cents part of the price
+ * @returns A decimal created from whole and cents
+ */
+
+function fromWholeAndCents(whole: number, cents: number): Decimal {
+   return new Decimal(whole).plus(new Decimal(cents).dividedBy(100))
+}
+
+function create(price: Decimal): Price {
+   return price
+}
+
 type Price = Decimal
 
 const Price = {
@@ -88,6 +104,8 @@ const Price = {
    asWholeAndCents,
    toCents,
    fromNumber,
+   fromWholeAndCents,
+   create,
 }
 
 export { Price }

@@ -70,3 +70,20 @@ describe("Price - getFormatted", () => {
       expect(result).toBe("3.53 Kč")
    })
 })
+
+describe("Price - fromWholeAndCents", () => {
+   it("Should return the correct decimal", () => {
+      const result = Price.fromWholeAndCents(3, 99)
+      expect(result).toStrictEqual(new Decimal(3.99))
+   })
+
+   it("Should return the correct decimal", () => {
+      const result = Price.fromWholeAndCents(3, 0)
+      expect(result).toStrictEqual(new Decimal(3))
+   })
+
+   it("Should return the correct decimal", () => {
+      const result = Price.fromWholeAndCents(3, 1)
+      expect(result).toStrictEqual(new Decimal(3.01))
+   })
+})

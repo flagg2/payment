@@ -112,7 +112,12 @@ async function hasValidVat(payer: Payer) {
    return response.map((res) => res.data.isValid)
 }
 
+function create(payer: Payer) {
+   return payer
+}
+
 const Payer = {
+   create,
    hasValidVat,
 }
 

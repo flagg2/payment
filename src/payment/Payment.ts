@@ -137,6 +137,10 @@ function addItem(
    payment.items.set(item, quantity)
 }
 
+function create(payment: Payment): Payment {
+   return payment
+}
+
 type Payment = {
    items: Map<PaymentItem, Decimal>
    currency: Currency
@@ -150,6 +154,7 @@ const Payment = {
    getPriceWithoutTax,
    getPriceWithTax,
    addItem,
+   create,
 }
 
 export { Payment }

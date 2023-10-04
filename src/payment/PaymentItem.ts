@@ -77,6 +77,10 @@ function fromInclusiveTaxRate(item: PaymentItemWithInclusiveTax): PaymentItem {
    }
 }
 
+function create(item: PaymentItem): PaymentItem {
+   return item
+}
+
 type PaymentItem = {
    name: string
    priceWithoutTax: Decimal
@@ -90,6 +94,7 @@ const PaymentItem = {
    getPriceWithTax,
    getPriceWithoutTax,
    fromInclusiveTaxRate,
+   create,
 }
 
 export { PaymentItem }
