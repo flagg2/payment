@@ -69,6 +69,11 @@ describe("Price - getFormatted", () => {
       const result = Price.getFormatted(price, "CZK")
       expect(result).toBe("3.53 Kč")
    })
+   it("Should work with discounts", () => {
+      const price = new Decimal(-3.99)
+      const result = Price.getFormatted(price, "CZK")
+      expect(result).toBe("-3.99 Kč")
+   })
 })
 
 describe("Price - fromWholeAndCents", () => {

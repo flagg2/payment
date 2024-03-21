@@ -1,17 +1,17 @@
-import { Address } from "../common"
+import { Address } from "../common/address"
 import { Result } from "@flagg2/result"
 import axios from "axios"
+import { z } from "zod"
+import { CompanyInfo } from "../common/companyInfo"
 
-type Payer = {
-   name: string
-   billingInfo: Address
-   shippingInfo?: Address
-   companyInfo?: {
-      businessId: string
-      taxId?: string
-      vatId?: string
-   }
-}
+type Payer = z.infer<typeof schema>
+
+const schema = z.object({
+   name: z.string().nonempty(),
+   billingInfo: Address.getSchema(),
+   shippingInfo: Address.getSchema().optional(),
+   companyInfo: CompanyInfo.getSchema(),
+})
 
 const API_URL = "https://ec.europa.eu/taxation_customs/vies/rest-api/ms"
 
@@ -52,23 +52,29 @@ function castIncludes<T extends readonly string[]>(arr: T, val: string) {
 }
 
 function extractPrefix(vat: string) {
-   return Result.from(() => {
-      const prefix = vat.slice(0, 2)
-      if (!castIncludes(KNOWN_PREFIXES, prefix)) {
-         throw new Error(`Unknown prefix ${prefix}`)
-      }
-      return prefix as keyof typeof KNOWN_PREFIXES
-   }, "UNKNOWN_PREFIX_ERROR")
+   return Result.from(
+      () => {
+         const prefix = vat.slice(0, 2)
+         if (!castIncludes(KNOWN_PREFIXES, prefix)) {
+            throw new Error(`Unknown prefix ${prefix}`)
+         }
+         return prefix as keyof typeof KNOWN_PREFIXES
+      },
+      () => "UNKNOWN_PREFIX_ERROR",
+   )
 }
 
 function extractNumber(vat: string) {
-   return Result.from(() => {
-      const number = vat.slice(2)
-      if (!number) {
-         throw new Error(`No number found in ${vat}`)
-      }
-      return number
-   }, "INVALID_VAT_ERROR")
+   return Result.from(
+      () => {
+         const number = vat.slice(2)
+         if (!number) {
+            throw new Error(`No number found in ${vat}`)
+         }
+         return number
+      },
+      () => "INVALID_VAT_ERROR",
+   )
 }
 
 type VatNumberValidationResult = {
@@ -91,7 +97,7 @@ type VatNumberValidationResult = {
  */
 
 async function hasValidVat(payer: Payer) {
-   if (payer.companyInfo?.vatId === undefined) {
+   if (payer.companyInfo.vatId === undefined) {
       return Result.ok(false)
    }
 
@@ -106,7 +112,7 @@ async function hasValidVat(payer: Payer) {
       axios.get<VatNumberValidationResult>(
          `${API_URL}/${String(prefix.value)}/vat/${number.value}`,
       ),
-      "INVALID_VAT_ERROR",
+      () => "INVALID_VAT_ERROR",
    )
 
    return response.map((res) => res.data.isValid)
@@ -119,6 +125,7 @@ function create(payer: Payer) {
 const Payer = {
    create,
    hasValidVat,
+   getSchema: () => schema,
 }
 
 export { Payer }

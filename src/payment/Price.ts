@@ -1,5 +1,7 @@
 import Decimal from "decimal.js"
-import { Currency } from "../common"
+import { positiveDecimal } from "../common/decimal"
+import { z } from "zod"
+import { Currency } from "../common/currency"
 
 /**
  * Round a price to a given precision
@@ -27,7 +29,7 @@ function asWholeAndCents(price: Decimal): {
    whole: Decimal
    cents: Decimal
 } {
-   const whole = price.floor()
+   const whole = price.lessThan(0) ? price.ceil() : price.floor()
    const cents = price.minus(whole).times(100).round()
    return { whole, cents }
 }
@@ -74,6 +76,9 @@ function toCents(price: Decimal): Decimal {
  */
 
 function getFormatted(price: Decimal, currency: Currency): string {
+   if (price.lessThan(0)) {
+      return `-${getFormatted(price.abs(), currency)}`
+   }
    const split = asWholeAndCents(price)
    return `${split.whole.toString()}.${split.cents
       .toString()
@@ -96,7 +101,9 @@ function create(price: Decimal): Price {
    return price
 }
 
-type Price = Decimal
+const schema = positiveDecimal
+
+type Price = z.infer<typeof schema>
 
 const Price = {
    getFormatted,
@@ -106,6 +113,7 @@ const Price = {
    fromNumber,
    fromWholeAndCents,
    create,
+   getSchema: () => schema,
 }
 
 export { Price }

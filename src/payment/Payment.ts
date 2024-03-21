@@ -1,11 +1,13 @@
 import Decimal from "decimal.js"
-import { Currency } from "../common"
+import { Currency } from "../common/currency"
 import { PaymentItem } from "./PaymentItem"
 import {
    StructuralMap,
    StructuralSet,
    stringifyObjectWithOrderedKeys,
 } from "@flagg2/data-structures"
+import { z } from "zod"
+import { positiveInteger } from "../common/decimal"
 
 /**
  * Get all different tax rates used in the payment
@@ -134,17 +136,23 @@ function addItem(
    item: Omit<PaymentItem, "taxRate"> & { taxRate: Decimal },
    quantity: Decimal,
 ): void {
-   payment.items.set(item, quantity)
+   const currentQuantity = payment.items.get(item)
+   payment.items.set(
+      item,
+      currentQuantity === undefined ? quantity : currentQuantity.plus(quantity),
+   )
 }
 
 function create(payment: Payment): Payment {
    return payment
 }
 
-type Payment = {
-   items: Map<PaymentItem, Decimal>
-   currency: Currency
-}
+const schema = z.object({
+   items: z.map(PaymentItem.getSchema(), positiveInteger),
+   currency: Currency.getSchema(),
+})
+
+type Payment = z.infer<typeof schema>
 
 const Payment = {
    getTaxAmountsForTaxRates,
@@ -155,6 +163,7 @@ const Payment = {
    getPriceWithTax,
    addItem,
    create,
+   getSchema: () => schema,
 }
 
 export { Payment }

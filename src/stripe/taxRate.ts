@@ -1,6 +1,6 @@
 import { Stripe as StripeSdk } from "stripe"
 import { Payment } from "../payment/Payment"
-import { AsyncResult, Result } from "@flagg2/result"
+import { Result } from "@flagg2/result"
 import Decimal from "decimal.js"
 import { TaxRate } from "../payment/TaxRate"
 import { takeWhileHasMore } from "./utils"
@@ -21,7 +21,7 @@ async function createMissingTaxRates(client: StripeSdk, toCreate: Decimal[]) {
             }),
          ),
       ),
-      "TAX_RATE_CREATION_FAILED",
+      () => "TAX_RATE_CREATION_FAILED",
    )
 }
 

@@ -50,12 +50,54 @@ describe("PaymentItem - getPriceWithTax", () => {
 
 describe("From inclusive tax rate", () => {
    it("Should work with inclusive tax 21", () => {
-      const item = PaymentItem.fromInclusiveTaxRate({
+      const item = PaymentItem.create({
          name: "McFlurry",
          priceWithTax: new Decimal(3.25),
          taxRate: new Decimal(21),
       })
 
       expect(item.priceWithoutTax).toEqual(new Decimal(2.5675))
+   })
+})
+
+describe("PaymentItem - createDiscount", () => {
+   it("Should work with 10% discount", () => {
+      const item = PaymentItem.createDiscount(exclusiveTax20, {
+         type: "percentage",
+         amount: new Decimal(10),
+      })
+
+      expect(item.priceWithoutTax).toEqual(new Decimal(-3.453))
+      expect(item.taxRate).toEqual(new Decimal(20))
+      expect(item.name).toEqual("Test Item - Zľava")
+
+      expect(PaymentItem.getPriceWithoutTax(item)).toEqual(new Decimal(-3.453))
+      expect(PaymentItem.getPriceWithTax(item)).toEqual(new Decimal(-4.1436))
+   })
+
+   it("Should work with fixed 10 EUR discount", () => {
+      const item = PaymentItem.createDiscount(exclusiveTax20, {
+         type: "fixed",
+         amount: new Decimal(10),
+      })
+
+      expect(item.priceWithoutTax).toEqual(new Decimal(-10))
+      expect(item.taxRate).toEqual(new Decimal(20))
+      expect(item.name).toEqual("Test Item - Zľava")
+   })
+
+   it("Should work with a custom name", () => {
+      const item = PaymentItem.createDiscount(
+         exclusiveTax20,
+         {
+            type: "percentage",
+            amount: new Decimal(10),
+         },
+         {
+            name: (originalName) => `${originalName} - Discount`,
+         },
+      )
+
+      expect(item.name).toEqual("Test Item - Discount")
    })
 })

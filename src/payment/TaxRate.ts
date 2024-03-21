@@ -1,4 +1,6 @@
 import Decimal from "decimal.js"
+import { positiveDecimal } from "../common/decimal"
+import { z } from "zod"
 
 /**
  * Get the display name of a tax rate to be used in invoices and payment services.
@@ -27,10 +29,13 @@ function create(taxRate: Decimal): TaxRate {
    return taxRate
 }
 
-type TaxRate = Decimal
+const schema = positiveDecimal
+
+type TaxRate = z.infer<typeof schema>
 const TaxRate = {
    getDisplayName,
    create,
+   getSchema: () => schema,
 }
 
 export { TaxRate }

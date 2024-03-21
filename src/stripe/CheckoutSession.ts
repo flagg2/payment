@@ -40,7 +40,7 @@ export async function create(
          cancel_url: cancel,
          locale,
       }),
-      "CHECKOUT_SESSION_CREATION_FAILED",
+      () => "CHECKOUT_SESSION_CREATION_FAILED",
    )
 }
 
@@ -56,7 +56,7 @@ export async function create(
 export async function findById(client: StripeSdk, id: string) {
    return Result.from(
       client.checkout.sessions.retrieve(id),
-      "CHECKOUT_SESSION_FETCH_FAILED",
+      () => "CHECKOUT_SESSION_FETCH_FAILED",
    )
 }
 
@@ -72,7 +72,7 @@ export async function findById(client: StripeSdk, id: string) {
 export async function expire(client: StripeSdk, id: string) {
    return Result.from(
       client.checkout.sessions.expire(id),
-      "CHECKOUT_SESSION_EXPIRE_FAILED",
+      () => "CHECKOUT_SESSION_EXPIRE_FAILED",
    )
 }
 

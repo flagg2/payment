@@ -15,7 +15,7 @@ beforeAll(() => {
 
 beforeEach(() => {
    unparsedMapInvoice = {
-      invoiceData: {
+      meta: {
          createdDate: new Date(),
          dueDate: new Date(),
          deliveryDate: new Date(),
@@ -129,8 +129,8 @@ describe("Invoice with map items", () => {
    it("Should not validate an invoice with invalid fields", () => {
       const result = Invoice.parseUnknown({
          ...unparsedMapInvoice,
-         invoiceData: {
-            ...unparsedMapInvoice.invoiceData,
+         meta: {
+            ...unparsedMapInvoice.meta,
             number: 1,
          },
       })
@@ -183,6 +183,7 @@ describe("Invoice with map items", () => {
             ]),
          },
       })
+      console.log(result.isErr() && result.origin)
       expect(result.isOk()).toBe(true)
       expect(result.unwrap()).toStrictEqual(parsedMapInvoice)
    })
@@ -212,8 +213,8 @@ describe("Invoice with array items", () => {
    it("Should not validate an invoice with invalid fields", () => {
       const result = Invoice.parseUnknown({
          ...arrayItemsInvoice,
-         invoiceData: {
-            ...arrayItemsInvoice.invoiceData,
+         meta: {
+            ...arrayItemsInvoice.meta,
             number: 1,
          },
       })

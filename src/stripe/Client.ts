@@ -11,7 +11,7 @@ type StripeClient = StripeClientImport
 
 function createStripeClient(privateKey: string): StripeClient {
    return new StripeClientImport(privateKey, {
-      apiVersion: "2022-11-15",
+      apiVersion: "2023-10-16",
    })
 }
 const StripeClient = {

@@ -1,4 +1,6 @@
 import Decimal from "decimal.js"
+import { z } from "zod"
+import { positiveDecimal } from "../common/decimal"
 
 /**
  * Get the price of a payment item without tax
@@ -77,24 +79,62 @@ function fromInclusiveTaxRate(item: PaymentItemWithInclusiveTax): PaymentItem {
    }
 }
 
-function create(item: PaymentItem): PaymentItem {
+function create(item: PaymentItem | PaymentItemWithInclusiveTax): PaymentItem {
+   if ("priceWithTax" in item) {
+      return fromInclusiveTaxRate(item)
+   }
+
    return item
 }
 
-type PaymentItem = {
-   name: string
-   priceWithoutTax: Decimal
-   taxRate: Decimal
-   description?: string
-   imageUrl?: string
+type Discount = {
+   type: "fixed" | "percentage"
+   amount: Decimal
 }
+
+function createDiscount(
+   forItem: PaymentItem | PaymentItemWithInclusiveTax,
+   discount: Discount,
+   opts: {
+      name: (originalName: string) => string
+   } = {
+      name: (originalName) => `${originalName} - Zľava`,
+   },
+) {
+   const item = create(forItem)
+
+   const { taxRate } = item
+   const { type, amount } = discount
+   const priceWithoutTax = (
+      type === "fixed"
+         ? amount
+         : item.priceWithoutTax.times(amount.dividedBy(100))
+   ).times(-1)
+
+   return create({
+      name: opts.name(item.name),
+      priceWithoutTax,
+      taxRate,
+   })
+}
+
+type PaymentItem = z.infer<typeof schema>
+
+const schema = z.object({
+   name: z.string(),
+   priceWithoutTax: positiveDecimal,
+   taxRate: positiveDecimal,
+   description: z.string().optional(),
+   imageUrl: z.string().optional(),
+})
 
 const PaymentItem = {
    getTax,
    getPriceWithTax,
    getPriceWithoutTax,
-   fromInclusiveTaxRate,
    create,
+   createDiscount,
+   getSchema: () => schema,
 }
 
 export { PaymentItem }

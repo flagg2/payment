@@ -1,14 +1,14 @@
-import { Address } from "../common"
+import { z } from "zod"
+import { Address } from "../common/address"
+import { CompanyInfo } from "../common/companyInfo"
 
-type Payee = {
-   name: string
-   billingInfo: Address
-   companyInfo: {
-      businessId: string
-      taxId?: string
-      vatId?: string
-   }
-}
+type Payee = z.infer<typeof schema>
+
+const schema = z.object({
+   name: z.string().nonempty(),
+   billingInfo: Address.getSchema(),
+   companyInfo: CompanyInfo.getSchema(),
+})
 
 function create(payee: Payee): Payee {
    return payee
@@ -16,6 +16,7 @@ function create(payee: Payee): Payee {
 
 const Payee = {
    create,
+   getSchema: () => schema,
 }
 
-export type { Payee }
+export { Payee }

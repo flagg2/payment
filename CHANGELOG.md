@@ -1,5 +1,37 @@
 # @flagg2/payment
 
+## 0.2.2
+
+### Patch Changes
+
+-  fix: price formatting
+-  fix: price formatting
+-  fix: price formatting
+
+## 0.2.1
+
+### Patch Changes
+
+-  fix: remove webhookhandler
+
+## 0.2.0
+
+### Minor Changes
+
+-  export schemas, add discounts
+
+## 0.1.19
+
+### Patch Changes
+
+-  fix stripe payment amount
+
+## 0.1.18
+
+### Patch Changes
+
+-  fix brisk
+
 ## 0.1.17
 
 ### Patch Changes
